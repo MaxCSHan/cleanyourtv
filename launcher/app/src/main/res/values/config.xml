@@ -395,6 +395,13 @@
          full, so the choice stands out over a wallpaper. The grid is not dimmed. 100 (the default) is off. Can also
          be set with "dock_unfocused_opacity". -->
     <integer name="dock_unfocused_opacity">100</integer>
+    <!-- Room under the dock row, in dp (0 to 120): less sits the dock lower over the wallpaper. The tiles keep their
+         size. 30 (the default) is as before. Can also be set with "dock_bottom_margin". -->
+    <integer name="dock_bottom_margin">30</integer>
+    <!-- The gap under the continue-watching row, in dp (0 to 60): to the dock app's name with dock_title, else to the
+         dock itself (without the title, the row used to keep the hidden name's room as well). Can also be set with
+         "continue_row_gap". -->
+    <integer name="continue_row_gap">20</integer>
     <!-- Rotating wallpapers: show each picture's name under the top-right buttons, from a captions.txt next to the
          pictures in wallpapers/ ("01-dusk.jpg<TAB>Dusk over the peaks", one per line). A picture without a line
          shows no name. Can also be set with "wallpaper_captions": true in a theme's config.json. -->

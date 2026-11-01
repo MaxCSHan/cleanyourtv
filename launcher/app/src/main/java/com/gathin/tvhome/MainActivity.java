@@ -158,6 +158,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private boolean continueCovers;
     /** dock_only_home: while the dock is focused, no grid row peeks in under it. */
     private boolean dockOnlyHome;
+    /** dock_title and continue_row_gap, for placing the continue-watching row. */
+    private boolean dockTitle;
+    private int continueRowGap;
     private LinearLayout heroDots;
     /** Cinematic top shelf (config.xml, cinematic_home): the focused dock app's artwork behind a larger shelf. */
     private boolean cinematic;
@@ -519,6 +522,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         heroArtAlpha = cfg.cinematicArt / 100f;
         if (cinematic) setUpCinematicShelf(cfg.cinematicScrim);
         dockOnlyHome = cfg.dockOnlyHome;
+        dockTitle = cfg.dockTitle;
+        continueRowGap = cfg.continueRowGap;
         if (cfg.dockTitleSize != 48) heroName.setTextSize(TypedValue.COMPLEX_UNIT_SP, cfg.dockTitleSize);
         // The row sits above the dock with or without the name over it (dock_title).
         if (!cinematic && cfg.continueWatchingDays > 0 && cfg.continueWatchingRow) {
@@ -715,7 +720,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             // Keep the hero below the header when the library is enabled on a short screen,
             // even when the theme requests an extra visible row below the dock.
             int shelfClearance = cfg.appLibrary ? hero.getMeasuredHeight() + (int) (40 * density) : 0;
-            int want = Math.max(shelfClearance, h - dockRow - gridRows - (int) (AppAdapter.BOTTOM_ROOM_DP * density));
+            int want = Math.max(shelfClearance, h - dockRow - gridRows - (int) (cfg.dockBottomMargin * density));
             // Where the rows cannot fit even at the smallest tile (3 rows with the title on), the title keeps its
             // room above the dock and the last rows run off the bottom instead of the title drawing over the clock.
             if (MainActivity.this.dockRow && cfg.dockTitle && rowsBelowDock > 0) want = Math.max(want, (int) (AppAdapter.TITLE_ROOM_DP * density));
@@ -2111,10 +2116,14 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         });
     }
 
-    /** Puts the row above the shelf at heroY and shows it, if it holds any show. */
+    /**
+     * Puts the row above the shelf at heroY and shows it, if it holds any show. Without dock_title the shelf is
+     * hidden, so the row sits on the dock (showHero places the shelf 40dp above it) instead of on empty room.
+     */
     private void placeContinueRow(float heroY) {
         if (continueShows.getChildCount() == 0) return;
-        continueRow.setY(heroY - continueRow.getHeight() - 20 * density);
+        float under = dockTitle ? heroY : heroY + hero.getHeight() + 40 * density;
+        continueRow.setY(under - continueRow.getHeight() - continueRowGap * density);
         continueRow.setVisibility(View.VISIBLE);
     }
 
