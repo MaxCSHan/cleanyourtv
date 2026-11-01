@@ -41,6 +41,8 @@ public final class LauncherSettingsActivity extends Activity {
     private TextView openOnStartChoice;
     private TextView continueChoice;
     private TextView settingsButtonChoice;
+    private TextView nowPlayingChoice;
+    private boolean nowPlaying;
     private boolean continueRow;
     private boolean settingsButton;
     private int columns;
@@ -162,6 +164,17 @@ public final class LauncherSettingsActivity extends Activity {
                 refresh();
             });
         }
+        nowPlaying = config.nowPlaying;
+        nowPlayingChoice = findViewById(R.id.nowPlayingChoice);
+        if (config.continueWatchingDays > 0) {
+            nowPlayingChoice.setVisibility(View.VISIBLE);
+            nowPlayingChoice.setOnClickListener(v -> {
+                nowPlaying = !nowPlaying;
+                choices.edit().putBoolean(Config.NOW_PLAYING_KEY, nowPlaying).apply();
+                changed();
+                refresh();
+            });
+        }
         settingsButton = config.showSettingsButton;
         settingsButtonChoice = findViewById(R.id.settingsButtonChoice);
         if (config.settingsKeycodes.length > 0) {
@@ -185,10 +198,12 @@ public final class LauncherSettingsActivity extends Activity {
             choices.edit().remove("columns").remove(Config.ROWS_BELOW_DOCK_KEY).remove("animations")
                     .remove("advanced_effects").remove(Config.WALLPAPER_CHOICE_KEY)
                     .remove(Config.DOCK_OPACITY_KEY).remove(Config.CLOCK_FORMAT_KEY).remove(OpenOnStart.KEY)
-                    .remove(Config.CONTINUE_ROW_KEY).remove(Config.SETTINGS_BUTTON_KEY).commit();
+                    .remove(Config.CONTINUE_ROW_KEY).remove(Config.SETTINGS_BUTTON_KEY)
+                    .remove(Config.NOW_PLAYING_KEY).commit();
             Config current = Config.load(this);
             continueRow = current.continueWatchingRow;
             settingsButton = current.showSettingsButton;
+            nowPlaying = current.nowPlaying;
             columns = current.columns;
             rowsBelowDock = current.rowsBelowDock;
             dockOpacity = current.dockOpacity;
@@ -348,6 +363,9 @@ public final class LauncherSettingsActivity extends Activity {
                         : getString(R.string.wallpaper_theme_default)));
         openOnStartChoice.setText(getString(R.string.open_on_start_state, openOnStartLabel()));
         continueChoice.setText(getString(R.string.continue_row_state, getString(continueRow ? R.string.on : R.string.off)));
+        nowPlayingChoice.setText(getString(R.string.now_playing_state, getString(nowPlaying ? R.string.on : R.string.off)));
+        nowPlayingChoice.setEnabled(continueRow);
+        nowPlayingChoice.setAlpha(continueRow ? 1f : 0.5f);
         settingsButtonChoice.setText(getString(R.string.settings_button_state,
                 getString(settingsButton ? R.string.on : R.string.off)));
         followThemeChoice.setSelected(!hasOnTvChoices());
@@ -358,7 +376,8 @@ public final class LauncherSettingsActivity extends Activity {
                 || choices.contains("animations") || choices.contains("advanced_effects")
                 || choices.contains(Config.WALLPAPER_CHOICE_KEY) || choices.contains(Config.DOCK_OPACITY_KEY)
                 || choices.contains(Config.CLOCK_FORMAT_KEY) || choices.contains(OpenOnStart.KEY)
-                || choices.contains(Config.CONTINUE_ROW_KEY) || choices.contains(Config.SETTINGS_BUTTON_KEY);
+                || choices.contains(Config.CONTINUE_ROW_KEY) || choices.contains(Config.SETTINGS_BUTTON_KEY)
+                || choices.contains(Config.NOW_PLAYING_KEY);
     }
 
     private void open(Intent intent) {

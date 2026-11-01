@@ -139,6 +139,12 @@
             android:visibility="gone" />
 
         <TextView
+            android:id="@+id/nowPlayingChoice"
+            style="@style/SettingsRow"
+            android:layout_marginTop="10dp"
+            android:visibility="gone" />
+
+        <TextView
             android:id="@+id/settingsButtonChoice"
             style="@style/SettingsRow"
             android:layout_marginTop="10dp"

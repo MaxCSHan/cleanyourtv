@@ -18,9 +18,10 @@ rebased on upstream regularly.
 | `dock_bottom_margin` | 0 to 120: room under the dock row, in dp; less sits the dock lower over the wallpaper, the tiles keep their size (default 30, as upstream) |
 | `continue_row_gap` | 0 to 60: the gap under the continue-watching row, in dp; without `dock_title` it is measured from the dock instead of the hidden name's room (default 20) |
 | `show_settings_button` | false hides the gear at the top right; Settings is then the remote's Settings button (`settings_key_keycodes`, with `settings_key_panel` a panel that includes Launcher settings); without one the gear always shows (default true) |
+| `now_playing` | with `continue_watching_row`: what plays while Home shows (Spotify and the like) as the row's first pill, with the song, the artist and the cover the app hands over; OK opens its player. Read from the TV's media sessions, offline; needs notification-listener access for `NowPlayingListener`, granted over ADB (default false) |
 
-In Launcher settings (hold OK on the gear, or Launcher settings in the remote's Settings panel), two rows switch
-`continue_watching_row` and `show_settings_button` on the TV. Unlike upstream's choices there, a theme push keeps
+In Launcher settings (hold OK on the gear, or Launcher settings in the remote's Settings panel), three rows switch
+`continue_watching_row`, `now_playing` and `show_settings_button` on the TV. Unlike upstream's choices there, a theme push keeps
 them: they are the owner's. Up from the continue-watching row reaches the top bar, and Down from the top bar the row.
 
 The Photos add-on (`addons/photo-screensaver`, `com.gathin.photodream`) also differs, in its card's slideshow: Left
@@ -31,4 +32,4 @@ show for a few seconds on the first start and on Up or Down, nothing stays on sc
 Nothing else in the launcher differs: no network access and the same `minSdk`. The APK may pass upstream's 576 KB gate, up to 600 KB.
 One permission is added: `READ_TV_LISTINGS`, used only by the two continue-watching switches and granted over ADB
 (`adb shell pm grant com.gathin.tvhome android.permission.READ_TV_LISTINGS`). Because it is a new permission, those
-switches stay in this fork rather than going upstream.
+switches stay in this fork rather than going upstream. `now_playing` adds a notification-listener service that does nothing itself; its access is granted over ADB (`cmd notification allow_listener com.gathin.tvhome/com.gathin.tvhome.NowPlayingListener`).

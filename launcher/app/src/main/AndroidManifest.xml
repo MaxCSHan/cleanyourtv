@@ -151,6 +151,16 @@
             android:theme="@style/Theme.TvHome" />
         <!-- Home button for remotes that send KEYCODE_ALL_APPS (Xiaomi). Opt-in: HOME_KEY_SERVICE=1
              build-and-install.sh; see HomeKeyService. -->
+        <!-- now_playing: does nothing itself. Its notification-listener access, granted over ADB, is what lets Home
+             read other apps' media sessions (the song playing and its cover). -->
+        <service
+            android:name=".NowPlayingListener"
+            android:exported="true"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
         <service
             android:name=".HomeKeyService"
             android:label="@string/home_key_name"

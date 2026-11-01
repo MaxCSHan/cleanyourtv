@@ -407,6 +407,12 @@
          Settings button set, the gear always shows. Also a choice in Launcher settings, which a theme push keeps. Can
          also be set with "show_settings_button". -->
     <bool name="show_settings_button">true</bool>
+    <!-- With continue_watching_row: what plays while Home shows (music from Spotify and the like) as the row's first
+         pill, with the song, the artist and the cover the app hands over; OK opens its player. Needs notification-
+         listener access, granted over ADB: cmd notification allow_listener com.gathin.tvhome/.NowPlayingListener
+         (build-and-install does it); without it nothing shows. Also a choice in Launcher settings. Can also be set
+         with "now_playing". -->
+    <bool name="now_playing">false</bool>
     <!-- Rotating wallpapers: show each picture's name under the top-right buttons, from a captions.txt next to the
          pictures in wallpapers/ ("01-dusk.jpg<TAB>Dusk over the peaks", one per line). A picture without a line
          shows no name. Can also be set with "wallpaper_captions": true in a theme's config.json. -->

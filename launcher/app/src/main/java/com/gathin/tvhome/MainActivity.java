@@ -3,6 +3,7 @@ package com.gathin.tvhome;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.app.Activity;
+import android.app.PendingIntent;
 import android.app.Dialog;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
@@ -162,6 +163,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private boolean dockTitle;
     /** The dock's band, whose left edge the continue-watching row lines up with. */
     private DockDecoration dockDecoration;
+    /** now_playing: the song playing, first in the continue-watching row; null when off. */
+    private NowPlaying nowPlaying;
     private int continueRowGap;
     private LinearLayout heroDots;
     /** Cinematic top shelf (config.xml, cinematic_home): the focused dock app's artwork behind a larger shelf. */
@@ -534,6 +537,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             continueWatching = new ContinueWatching(this, cfg.continueWatchingDays, continueCovers);
             continueRow = findViewById(R.id.continueRow);
             continueShows = findViewById(R.id.continueShows);
+            if (cfg.nowPlaying) nowPlaying = new NowPlaying(this, Math.round(30 * density), this::fillContinueRow);
         } else if (!cinematic && cfg.dockTitle && cfg.continueWatchingDays > 0) {
             continueWatching = new ContinueWatching(this, cfg.continueWatchingDays, false);
             heroMeta.setVisibility(View.INVISIBLE);   // keeps its height, so the name does not jump when it fills in
@@ -1120,6 +1124,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         if (openLiveTvAfterBoot()) return;
         updateGreeting();
         updatePanel();
+        if (nowPlaying != null) nowPlaying.start();
         if (continueWatching != null) {
             continueWatching.refresh(() -> {
                 if (continueRow != null) fillContinueRow();
@@ -1312,6 +1317,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         // Only Home's own share is dropped: a key service that saw the same DOWN keeps its hold.
         RemoteKeys.release(this);
         cancelHoldOk();
+        if (nowPlaying != null) nowPlaying.stop();
         root.removeCallbacks(showIdleClock);
         endReorder();   // Home or another app while reordering keeps the order so far
         wallpaperPlayer.stop();
@@ -2065,9 +2071,13 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
     /** continue_watching_row: one pill per show, the app's icon before its text; hidden when there is none. */
     private void fillContinueRow() {
+        // A new song while the row has focus rebuilds it: keep the focus at the same place.
+        View focused = continueShows.getFocusedChild();
+        int focusAt = focused == null ? -1 : continueShows.indexOfChild(focused);
         continueShows.removeAllViews();
         PackageManager pm = getPackageManager();
         int icon = Math.round(24 * density);
+        addNowPlaying(pm);
         for (ContinueWatching.Item item : continueWatching.items()) {
             Drawable appIcon;
             try {
@@ -2097,23 +2107,13 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             }
             show.setTag(item.pkg);
             show.setOnClickListener(v -> resume(item));
-            show.setOnKeyListener((v, keyCode, event) -> {
-                if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
-                    if (event.getAction() == KeyEvent.ACTION_DOWN) focusTile(lastFocused);
-                    return true;
-                }
-                // Up: the top bar, as Up from the dock reaches it without the row (the focus finder found nothing
-                // above a pill, so the gear was out of reach).
-                if (keyCode == KeyEvent.KEYCODE_DPAD_UP) {
-                    if (event.getAction() == KeyEvent.ACTION_DOWN) firstTopButton().requestFocus();
-                    return true;
-                }
-                // The row's two ends: focus stays rather than jumping to whatever lies beyond.
-                if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT) return v == continueShows.getChildAt(0);
-                return keyCode == KeyEvent.KEYCODE_DPAD_RIGHT
-                        && v == continueShows.getChildAt(continueShows.getChildCount() - 1);
-            });
+            show.setOnKeyListener(this::onContinueKey);
             continueShows.addView(show);
+        }
+        if (focusAt >= 0) {
+            View again = continueShows.getChildAt(Math.min(focusAt, continueShows.getChildCount() - 1));
+            if (again != null) again.requestFocus();
+            else focusTile(lastFocused);
         }
         if (continueShows.getChildCount() == 0) {
             continueRow.setVisibility(View.GONE);
@@ -2124,6 +2124,58 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         continueRow.post(() -> {
             if (heroShown) placeContinueRow(hero.getY());
         });
+    }
+
+    private boolean onContinueKey(View v, int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
+            if (event.getAction() == KeyEvent.ACTION_DOWN) focusTile(lastFocused);
+            return true;
+        }
+        // Up: the top bar, as Up from the dock reaches it without the row (the focus finder found nothing above a
+        // pill, so the gear was out of reach).
+        if (keyCode == KeyEvent.KEYCODE_DPAD_UP) {
+            if (event.getAction() == KeyEvent.ACTION_DOWN) firstTopButton().requestFocus();
+            return true;
+        }
+        // The row's two ends: focus stays rather than jumping to whatever lies beyond.
+        if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT) return v == continueShows.getChildAt(0);
+        return keyCode == KeyEvent.KEYCODE_DPAD_RIGHT
+                && v == continueShows.getChildAt(continueShows.getChildCount() - 1);
+    }
+
+    /** now_playing: the song first in the row, with its cover (else its app's icon); OK opens its player. */
+    private void addNowPlaying(PackageManager pm) {
+        NowPlaying.Track track = nowPlaying == null ? null : nowPlaying.track();
+        if (track == null) return;
+        Drawable art;
+        try {
+            art = track.art != null ? new BitmapDrawable(getResources(), track.art) : pm.getApplicationIcon(track.pkg);
+        } catch (PackageManager.NameNotFoundException e) {
+            return;
+        }
+        int size = Math.round((track.art != null ? 30 : 24) * density);
+        art.setBounds(0, 0, size, track.art != null ? size * track.art.getHeight() / track.art.getWidth() : size);
+        TextView pill = (TextView) getLayoutInflater().inflate(R.layout.continue_show, continueShows, false);
+        pill.setText(track.artist.isEmpty() ? track.title : track.title + " · " + track.artist);
+        pill.setContentDescription(getString(R.string.now_playing) + ": " + pill.getText());
+        pill.setCompoundDrawables(art, null, null, null);
+        pill.setCompoundDrawableTintList(null);
+        pill.setTag(track.pkg);
+        pill.setOnClickListener(v -> {
+            try {
+                if (track.player != null) {
+                    track.player.send();
+                    return;
+                }
+            } catch (PendingIntent.CanceledException ignored) {
+                // The player is gone: open the app instead.
+            }
+            Intent i = pm.getLeanbackLaunchIntentForPackage(track.pkg);
+            if (i == null) i = pm.getLaunchIntentForPackage(track.pkg);
+            if (i != null) open(i);
+        });
+        pill.setOnKeyListener(this::onContinueKey);
+        continueShows.addView(pill);
     }
 
     /**
