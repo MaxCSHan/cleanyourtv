@@ -179,6 +179,26 @@ public final class LauncherSettingsActivity extends Activity {
             screensaverChoice.setVisibility(View.VISIBLE);
             screensaverChoice.setOnClickListener(v -> showScreensaverPicker());
         }
+        boolean rotating = config.wallpaperRotationMinutes > 0 && config.wallpapers.size() > 1;
+        int[] minutes = {1, 5, 15, 30, 60};
+        pickerRow(R.id.intervalChoice, R.string.wallpaper_interval_label, rotating, minutes,
+                m -> getString(R.string.screensaver_minutes, m), config.wallpaperRotationMinutes,
+                m -> choices.edit().putInt(Config.ROTATION_KEY, m).apply());
+        boolean sequential = WallpaperRotation.ORDER_SEQUENTIAL.equals(config.wallpaperOrder);
+        pickerRow(R.id.orderChoice, R.string.wallpaper_order_label, rotating, new int[]{0, 1},
+                i -> getString(i == 1 ? R.string.wallpaper_order_sequential : R.string.wallpaper_order_shuffle),
+                sequential ? 1 : 0, i -> choices.edit().putString(Config.ORDER_KEY,
+                        i == 1 ? WallpaperRotation.ORDER_SEQUENTIAL : WallpaperRotation.ORDER_SHUFFLE).apply());
+        pickerRow(R.id.fadeChoice, R.string.wallpaper_fade_label, rotating, new int[]{0, 800, 1500, 3000},
+                ms -> ms == 0 ? getString(R.string.off) : getString(R.string.seconds_value, ms / 1000f),
+                config.wallpaperFadeMs, ms -> choices.edit().putInt(Config.FADE_KEY, ms).apply());
+        pickerRow(R.id.spotlightChoice, R.string.dock_spotlight_label, config.dockRow, new int[]{100, 70, 55, 40},
+                a -> a == 100 ? getString(R.string.off) : (100 - a) + "%", config.dockUnfocusedOpacity,
+                a -> choices.edit().putInt(Config.SPOTLIGHT_KEY, a).apply());
+        pickerRow(R.id.dockMarginChoice, R.string.dock_margin_label, config.dockRow, new int[]{0, 10, 30, 60},
+                dp -> getString(dp == 0 ? R.string.dock_margin_lowest : dp == 10 ? R.string.dock_margin_low
+                        : dp == 30 ? R.string.dock_margin_standard : R.string.dock_margin_high),
+                config.dockBottomMargin, dp -> choices.edit().putInt(Config.DOCK_MARGIN_KEY, dp).apply());
         settingsButton = config.showSettingsButton;
         settingsButtonChoice = findViewById(R.id.settingsButtonChoice);
         if (config.settingsKeycodes.length > 0) {
@@ -199,11 +219,9 @@ public final class LauncherSettingsActivity extends Activity {
         followThemeChoice = findViewById(R.id.followThemeChoice);
         followThemeChoice.setOnClickListener(v -> {
             if (!hasOnTvChoices()) return;
-            choices.edit().remove("columns").remove(Config.ROWS_BELOW_DOCK_KEY).remove("animations")
-                    .remove("advanced_effects").remove(Config.WALLPAPER_CHOICE_KEY)
-                    .remove(Config.DOCK_OPACITY_KEY).remove(Config.CLOCK_FORMAT_KEY).remove(OpenOnStart.KEY)
-                    .remove(Config.CONTINUE_ROW_KEY).remove(Config.SETTINGS_BUTTON_KEY)
-                    .remove(Config.NOW_PLAYING_KEY).commit();
+            SharedPreferences.Editor clear = choices.edit();
+            for (String key : TvChoices.ALL) clear.remove(key);
+            clear.commit();
             Config current = Config.load(this);
             continueRow = current.continueWatchingRow;
             settingsButton = current.showSettingsButton;
@@ -215,7 +233,7 @@ public final class LauncherSettingsActivity extends Activity {
             animations = current.animations;
             advancedEffects = current.animations && current.advancedEffects;
             changed();
-            refresh();
+            recreate();   // every row again with the theme's values
         });
         findViewById(R.id.defaultHomeChoice).setOnClickListener(v ->
                 open(new Intent(this, HomeSettingsActivity.class)));
@@ -302,6 +320,41 @@ public final class LauncherSettingsActivity extends Activity {
                 })
                 .setNegativeButton(android.R.string.cancel, null)
                 .show();
+    }
+
+    private interface Label { String of(int value); }
+    private interface Pick { void save(int value); }
+
+    /**
+     * A row that picks one of fixed values: "Label: value", a list to choose from on OK, saved at once (Home
+     * rebuilds). A theme value that is not one of them still shows, with nothing ticked.
+     */
+    private void pickerRow(int id, int label, boolean shown, int[] values, Label name, int current, Pick pick) {
+        TextView row = findViewById(id);
+        if (!shown) return;
+        row.setVisibility(View.VISIBLE);
+        int[] now = {current};
+        row.setText(getString(R.string.row_state, getString(label), name.of(now[0])));
+        row.setOnClickListener(v -> {
+            String[] names = new String[values.length];
+            int checked = -1;
+            for (int i = 0; i < values.length; i++) {
+                names[i] = name.of(values[i]);
+                if (values[i] == now[0]) checked = i;
+            }
+            new AlertDialog.Builder(this)
+                    .setTitle(label)
+                    .setSingleChoiceItems(names, checked, (dialog, which) -> {
+                        dialog.dismiss();
+                        now[0] = values[which];
+                        pick.save(values[which]);
+                        row.setText(getString(R.string.row_state, getString(label), name.of(now[0])));
+                        changed();
+                        refresh();
+                    })
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show();
+        });
     }
 
     /** The TV's own screensaver delay: written to the system, so the TV's settings and the Mac see the same. */
@@ -409,12 +462,8 @@ public final class LauncherSettingsActivity extends Activity {
     }
 
     private boolean hasOnTvChoices() {
-        return choices.contains("columns") || choices.contains(Config.ROWS_BELOW_DOCK_KEY)
-                || choices.contains("animations") || choices.contains("advanced_effects")
-                || choices.contains(Config.WALLPAPER_CHOICE_KEY) || choices.contains(Config.DOCK_OPACITY_KEY)
-                || choices.contains(Config.CLOCK_FORMAT_KEY) || choices.contains(OpenOnStart.KEY)
-                || choices.contains(Config.CONTINUE_ROW_KEY) || choices.contains(Config.SETTINGS_BUTTON_KEY)
-                || choices.contains(Config.NOW_PLAYING_KEY);
+        for (String key : TvChoices.ALL) if (choices.contains(key)) return true;
+        return false;
     }
 
     private void open(Intent intent) {

@@ -173,4 +173,17 @@
     <string name="screensaver_delay_label">Screensaver starts after</string>
     <string name="screensaver_never">Never</string>
     <string name="screensaver_minutes">%1$d min</string>
+    <string name="row_state">%1$s: %2$s</string>
+    <string name="wallpaper_interval_label">Next photo every</string>
+    <string name="wallpaper_order_label">Photo order</string>
+    <string name="wallpaper_order_shuffle">Shuffle</string>
+    <string name="wallpaper_order_sequential">By date taken</string>
+    <string name="wallpaper_fade_label">Crossfade</string>
+    <string name="seconds_value">%1$.1f s</string>
+    <string name="dock_spotlight_label">Dock spotlight (dims the other apps)</string>
+    <string name="dock_margin_label">Dock position</string>
+    <string name="dock_margin_lowest">Lowest</string>
+    <string name="dock_margin_low">Low</string>
+    <string name="dock_margin_standard">Standard</string>
+    <string name="dock_margin_high">High</string>
 </resources>

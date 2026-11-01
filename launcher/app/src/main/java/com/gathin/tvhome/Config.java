@@ -45,6 +45,9 @@ final class Config {
     static final String CONTINUE_ROW_KEY = "continue_watching_row", SETTINGS_BUTTON_KEY = "show_settings_button",
             NOW_PLAYING_KEY = "now_playing";
     static final String ROWS_BELOW_DOCK_KEY = "rows_below_dock";
+    /** Wallpaper and dock choices from Launcher settings (B19), under their config.json names. */
+    static final String ROTATION_KEY = "wallpaper_rotation_minutes", ORDER_KEY = "wallpaper_order",
+            FADE_KEY = "wallpaper_fade_ms", SPOTLIGHT_KEY = "dock_unfocused_opacity", DOCK_MARGIN_KEY = "dock_bottom_margin";
     static final String WALLPAPER_CHOICE_KEY = "wallpaper_choice";
     static final String DOCK_OPACITY_KEY = "dock_opacity";
     static final String CLOCK_FORMAT_KEY = "clock_format";
@@ -734,6 +737,10 @@ final class Config {
         boolean wallpaperEnabled = json == null || bool(json, "wallpaper", true);
         if (!wallpaperEnabled) wallpaper = null;
         int rotationMinutes = json == null ? 0 : integer(json, "wallpaper_rotation_minutes", 0, 0, 1440);
+        rotationMinutes = chosen(choices, ROTATION_KEY, rotationMinutes, 1, 1440);
+        wallpaperFadeMs = chosen(choices, FADE_KEY, wallpaperFadeMs, 0, 3000);
+        dockUnfocusedOpacity = chosen(choices, SPOTLIGHT_KEY, dockUnfocusedOpacity, 30, 100);
+        dockBottomMargin = chosen(choices, DOCK_MARGIN_KEY, dockBottomMargin, 0, 120);
         int wallpaperDim = json == null ? 0 : integer(json, "wallpaper_dim", 0, 0, 90);
         int dockOpacity = json == null ? 100 : integer(json, "dock_opacity", 100, 30, 100);
         dockOpacity = chosenDockOpacity(choices.getInt(DOCK_OPACITY_KEY, -1), dockOpacity);
@@ -747,6 +754,8 @@ final class Config {
                 : string(json, "wallpaper_order", WallpaperRotation.ORDER_SHUFFLE);
         // An unknown order must not silently change how an existing collection rotates.
         if (!WallpaperRotation.validOrder(wallpaperOrder)) wallpaperOrder = WallpaperRotation.ORDER_SHUFFLE;
+        String chosenOrder = choices.getString(ORDER_KEY, null);
+        if (WallpaperRotation.validOrder(chosenOrder)) wallpaperOrder = chosenOrder;
         List<File> wallpapers = new ArrayList<>();
         if (rotationMinutes > 0 && dir != null && wallpaperEnabled) {
             wallpapers.addAll(WallpaperRotation.images(new File(dir, "wallpapers")));
@@ -841,6 +850,12 @@ final class Config {
                     .remove(ROWS_BELOW_DOCK_KEY).remove(WALLPAPER_CHOICE_KEY).remove(DOCK_OPACITY_KEY)
                     .remove(CLOCK_FORMAT_KEY).putString(THEME_SIGNATURE_KEY, signature).commit();
         }
+    }
+
+    /** A number chosen in Launcher settings, or the theme's when none (or an out-of-range one) is saved. */
+    static int chosen(SharedPreferences choices, String key, int theme, int min, int max) {
+        int c = choices.getInt(key, Integer.MIN_VALUE);
+        return c >= min && c <= max ? c : theme;
     }
 
     /** The dock band opacity chosen in Launcher settings, or the theme's when none (or an out-of-range one) is saved. */

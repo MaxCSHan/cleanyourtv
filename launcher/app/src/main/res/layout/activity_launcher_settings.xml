@@ -88,6 +88,10 @@
             <TextView android:id="@+id/dock30" style="@style/SettingsColumnChoice" android:text="30%" />
         </LinearLayout>
 
+        <!-- The dock's spotlight and how low it sits (B19). -->
+        <TextView android:id="@+id/spotlightChoice" style="@style/SettingsRow" android:layout_marginTop="10dp" android:visibility="gone" />
+        <TextView android:id="@+id/dockMarginChoice" style="@style/SettingsRow" android:layout_marginTop="10dp" android:visibility="gone" />
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -111,6 +115,11 @@
             android:id="@+id/wallpaperChoice"
             style="@style/SettingsRow"
             android:layout_marginTop="28dp" />
+
+        <!-- A rotating collection's interval, order and crossfade (B19); shown when the theme rotates photos. -->
+        <TextView android:id="@+id/intervalChoice" style="@style/SettingsRow" android:layout_marginTop="10dp" android:visibility="gone" />
+        <TextView android:id="@+id/orderChoice" style="@style/SettingsRow" android:layout_marginTop="10dp" android:visibility="gone" />
+        <TextView android:id="@+id/fadeChoice" style="@style/SettingsRow" android:layout_marginTop="10dp" android:visibility="gone" />
 
         <TextView
             android:id="@+id/animationsChoice"

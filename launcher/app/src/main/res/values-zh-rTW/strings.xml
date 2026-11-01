@@ -121,4 +121,17 @@
     <string name="screensaver_delay_label">螢幕保護程式啟動時間</string>
     <string name="screensaver_never">永不</string>
     <string name="screensaver_minutes">%1$d 分鐘</string>
+    <string name="row_state">%1$s：%2$s</string>
+    <string name="wallpaper_interval_label">換圖間隔</string>
+    <string name="wallpaper_order_label">播放順序</string>
+    <string name="wallpaper_order_shuffle">隨機</string>
+    <string name="wallpaper_order_sequential">依拍攝日期</string>
+    <string name="wallpaper_fade_label">淡入淡出</string>
+    <string name="seconds_value">%1$.1f 秒</string>
+    <string name="dock_spotlight_label">Dock 焦點效果（淡化其他應用程式）</string>
+    <string name="dock_margin_label">Dock 位置</string>
+    <string name="dock_margin_lowest">最低</string>
+    <string name="dock_margin_low">低</string>
+    <string name="dock_margin_standard">標準</string>
+    <string name="dock_margin_high">高</string>
 </resources>

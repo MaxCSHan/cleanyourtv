@@ -19,10 +19,17 @@ import java.util.Map;
  */
 final class TvChoices {
     static final String SET_NAME = "choices-set.json", STATE_NAME = "choices.json";
-    private static final String[] INTS = {"columns", Config.ROWS_BELOW_DOCK_KEY, Config.DOCK_OPACITY_KEY};
+    private static final String[] INTS = {"columns", Config.ROWS_BELOW_DOCK_KEY, Config.DOCK_OPACITY_KEY,
+            Config.ROTATION_KEY, Config.FADE_KEY, Config.SPOTLIGHT_KEY, Config.DOCK_MARGIN_KEY};
     private static final String[] BOOLS = {"animations", "advanced_effects", Config.CONTINUE_ROW_KEY,
             Config.NOW_PLAYING_KEY, Config.SETTINGS_BUTTON_KEY};
-    private static final String[] STRINGS = {Config.CLOCK_FORMAT_KEY, Config.WALLPAPER_CHOICE_KEY, OpenOnStart.KEY};
+    private static final String[] STRINGS = {Config.CLOCK_FORMAT_KEY, Config.WALLPAPER_CHOICE_KEY, OpenOnStart.KEY,
+            Config.ORDER_KEY};
+    /** Every choice, for Follow theme. */
+    static final String[] ALL = {"columns", Config.ROWS_BELOW_DOCK_KEY, Config.DOCK_OPACITY_KEY, Config.ROTATION_KEY,
+            Config.FADE_KEY, Config.SPOTLIGHT_KEY, Config.DOCK_MARGIN_KEY, "animations", "advanced_effects",
+            Config.CONTINUE_ROW_KEY, Config.NOW_PLAYING_KEY, Config.SETTINGS_BUTTON_KEY, Config.CLOCK_FORMAT_KEY,
+            Config.WALLPAPER_CHOICE_KEY, OpenOnStart.KEY, Config.ORDER_KEY};
 
     private TvChoices() {}
 
