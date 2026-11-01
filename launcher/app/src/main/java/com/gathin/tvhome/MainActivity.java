@@ -165,6 +165,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private DockDecoration dockDecoration;
     /** now_playing: the song playing, first in the continue-watching row; null when off. */
     private NowPlaying nowPlaying;
+    /** continue_watching_row: the shows are in the row (else it may hold only what plays). */
+    private boolean showsInRow;
+    private TextView continueTitle;
     private int continueRowGap;
     private LinearLayout heroDots;
     /** Cinematic top shelf (config.xml, cinematic_home): the focused dock app's artwork behind a larger shelf. */
@@ -531,13 +534,18 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         continueRowGap = cfg.continueRowGap;
         if (cfg.dockTitleSize != 48) heroName.setTextSize(TypedValue.COMPLEX_UNIT_SP, cfg.dockTitleSize);
         // The row sits above the dock with or without the name over it (dock_title).
-        if (!cinematic && cfg.continueWatchingDays > 0 && cfg.continueWatchingRow) {
+        // now_playing uses the same row, with or without the shows in it.
+        showsInRow = !cinematic && cfg.continueWatchingDays > 0 && cfg.continueWatchingRow;
+        if (showsInRow || (!cinematic && cfg.nowPlaying)) {
+            continueRow = findViewById(R.id.continueRow);
+            continueShows = findViewById(R.id.continueShows);
+            continueTitle = findViewById(R.id.continueTitle);
+            if (cfg.nowPlaying) nowPlaying = new NowPlaying(this, Math.round(30 * density), this::fillContinueRow);
+        }
+        if (showsInRow) {
             // The row shows the same shows, so the line under the name stays out and its room goes to the wallpaper.
             continueCovers = cfg.continueWatchingCovers;
             continueWatching = new ContinueWatching(this, cfg.continueWatchingDays, continueCovers);
-            continueRow = findViewById(R.id.continueRow);
-            continueShows = findViewById(R.id.continueShows);
-            if (cfg.nowPlaying) nowPlaying = new NowPlaying(this, Math.round(30 * density), this::fillContinueRow);
         } else if (!cinematic && cfg.dockTitle && cfg.continueWatchingDays > 0) {
             continueWatching = new ContinueWatching(this, cfg.continueWatchingDays, false);
             heroMeta.setVisibility(View.INVISIBLE);   // keeps its height, so the name does not jump when it fills in
@@ -1127,7 +1135,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         if (nowPlaying != null) nowPlaying.start();
         if (continueWatching != null) {
             continueWatching.refresh(() -> {
-                if (continueRow != null) fillContinueRow();
+                if (showsInRow) fillContinueRow();
                 else if (heroShown && lastFocused < adapter.appCount()) updateContinueLine(lastFocused);
             });
         }
@@ -1978,7 +1986,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private void fillHero(int position, String label) {
         heroName.setText(label);
         if (!cinematic) {
-            if (continueWatching != null && continueRow == null) updateContinueLine(position);
+            if (continueWatching != null && !showsInRow) updateContinueLine(position);
             return;
         }
         updateHeroMeta(position);
@@ -2078,7 +2086,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         PackageManager pm = getPackageManager();
         int icon = Math.round(24 * density);
         addNowPlaying(pm);
-        for (ContinueWatching.Item item : continueWatching.items()) {
+        List<ContinueWatching.Item> shows = showsInRow ? continueWatching.items() : Collections.emptyList();
+        // The title names what the row holds: shows, or only the song playing.
+        continueTitle.setText(shows.isEmpty() ? R.string.now_playing : R.string.continue_row);
+        for (ContinueWatching.Item item : shows) {
             Drawable appIcon;
             try {
                 appIcon = pm.getApplicationIcon(item.pkg);

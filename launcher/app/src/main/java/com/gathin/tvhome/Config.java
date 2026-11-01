@@ -160,7 +160,7 @@ final class Config {
     final int continueRowGap;
     /** show_settings_button: the gear at the top right; off leaves Settings to the remote's Settings button. */
     final boolean showSettingsButton;
-    /** now_playing: with continue_watching_row, what plays (a song and its cover) first in that row. */
+    /** now_playing: what plays (a song and its cover) first in the continue-watching row, alone when that is off. */
     final boolean nowPlaying;
     /** App library as a round button in the top bar (config.xml library_button); needs app_library. */
     final boolean libraryButton;

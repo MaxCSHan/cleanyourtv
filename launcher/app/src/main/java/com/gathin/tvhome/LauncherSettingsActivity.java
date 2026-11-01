@@ -166,15 +166,13 @@ public final class LauncherSettingsActivity extends Activity {
         }
         nowPlaying = config.nowPlaying;
         nowPlayingChoice = findViewById(R.id.nowPlayingChoice);
-        if (config.continueWatchingDays > 0) {
-            nowPlayingChoice.setVisibility(View.VISIBLE);
-            nowPlayingChoice.setOnClickListener(v -> {
-                nowPlaying = !nowPlaying;
-                choices.edit().putBoolean(Config.NOW_PLAYING_KEY, nowPlaying).apply();
-                changed();
-                refresh();
-            });
-        }
+        nowPlayingChoice.setVisibility(View.VISIBLE);
+        nowPlayingChoice.setOnClickListener(v -> {
+            nowPlaying = !nowPlaying;
+            choices.edit().putBoolean(Config.NOW_PLAYING_KEY, nowPlaying).apply();
+            changed();
+            refresh();
+        });
         settingsButton = config.showSettingsButton;
         settingsButtonChoice = findViewById(R.id.settingsButtonChoice);
         if (config.settingsKeycodes.length > 0) {
@@ -364,8 +362,6 @@ public final class LauncherSettingsActivity extends Activity {
         openOnStartChoice.setText(getString(R.string.open_on_start_state, openOnStartLabel()));
         continueChoice.setText(getString(R.string.continue_row_state, getString(continueRow ? R.string.on : R.string.off)));
         nowPlayingChoice.setText(getString(R.string.now_playing_state, getString(nowPlaying ? R.string.on : R.string.off)));
-        nowPlayingChoice.setEnabled(continueRow);
-        nowPlayingChoice.setAlpha(continueRow ? 1f : 0.5f);
         settingsButtonChoice.setText(getString(R.string.settings_button_state,
                 getString(settingsButton ? R.string.on : R.string.off)));
         followThemeChoice.setSelected(!hasOnTvChoices());

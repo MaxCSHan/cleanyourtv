@@ -18,7 +18,7 @@ rebased on upstream regularly.
 | `dock_bottom_margin` | 0 to 120: room under the dock row, in dp; less sits the dock lower over the wallpaper, the tiles keep their size (default 30, as upstream) |
 | `continue_row_gap` | 0 to 60: the gap under the continue-watching row, in dp; without `dock_title` it is measured from the dock instead of the hidden name's room (default 20) |
 | `show_settings_button` | false hides the gear at the top right; Settings is then the remote's Settings button (`settings_key_keycodes`, with `settings_key_panel` a panel that includes Launcher settings); without one the gear always shows (default true) |
-| `now_playing` | with `continue_watching_row`: what plays while Home shows (Spotify and the like) as the row's first pill, with the song, the artist and the cover the app hands over; OK opens its player. Read from the TV's media sessions, offline; needs notification-listener access for `NowPlayingListener`, granted over ADB (default false) |
+| `now_playing` | what plays while Home shows (Spotify and the like) as the continue-watching row's first pill, alone there (titled Now playing) when `continue_watching_row` is off, with the song, the artist and the cover the app hands over; OK opens its player. Read from the TV's media sessions, offline; needs notification-listener access for `NowPlayingListener`, granted over ADB (default false) |
 
 In Launcher settings (hold OK on the gear, or Launcher settings in the remote's Settings panel), three rows switch
 `continue_watching_row`, `now_playing` and `show_settings_button` on the TV. Unlike upstream's choices there, a theme push keeps
