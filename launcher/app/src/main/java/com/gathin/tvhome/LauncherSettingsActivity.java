@@ -42,6 +42,7 @@ public final class LauncherSettingsActivity extends Activity {
     private TextView continueChoice;
     private TextView settingsButtonChoice;
     private TextView nowPlayingChoice;
+    private TextView screensaverChoice;
     private boolean nowPlaying;
     private boolean continueRow;
     private boolean settingsButton;
@@ -173,6 +174,11 @@ public final class LauncherSettingsActivity extends Activity {
             changed();
             refresh();
         });
+        screensaverChoice = findViewById(R.id.screensaverChoice);
+        if (Settings.System.canWrite(this)) {
+            screensaverChoice.setVisibility(View.VISIBLE);
+            screensaverChoice.setOnClickListener(v -> showScreensaverPicker());
+        }
         settingsButton = config.showSettingsButton;
         settingsButtonChoice = findViewById(R.id.settingsButtonChoice);
         if (config.settingsKeycodes.length > 0) {
@@ -298,6 +304,40 @@ public final class LauncherSettingsActivity extends Activity {
                 .show();
     }
 
+    /** The TV's own screensaver delay: written to the system, so the TV's settings and the Mac see the same. */
+    private void showScreensaverPicker() {
+        int current = screensaverMinutes();
+        String[] labels = new String[ScreensaverDelay.MINUTES.length];
+        int checked = -1;
+        for (int i = 0; i < labels.length; i++) {
+            labels[i] = delayLabel(ScreensaverDelay.MINUTES[i]);
+            if (ScreensaverDelay.MINUTES[i] == current) checked = i;
+        }
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.screensaver_delay_label)
+                .setSingleChoiceItems(labels, checked, (dialog, which) -> {
+                    dialog.dismiss();
+                    try {
+                        Settings.System.putInt(getContentResolver(), Settings.System.SCREEN_OFF_TIMEOUT,
+                                ScreensaverDelay.timeoutMs(ScreensaverDelay.MINUTES[which]));
+                    } catch (SecurityException e) {
+                        Toast.makeText(this, R.string.not_available, Toast.LENGTH_LONG).show();
+                    }
+                    refresh();
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    private int screensaverMinutes() {
+        return ScreensaverDelay.minutes(Settings.System.getLong(getContentResolver(),
+                Settings.System.SCREEN_OFF_TIMEOUT, ScreensaverDelay.NEVER_MS));
+    }
+
+    private String delayLabel(int minutes) {
+        return minutes == 0 ? getString(R.string.screensaver_never) : getString(R.string.screensaver_minutes, minutes);
+    }
+
     /** The picked app's name, its package when it is gone, or Off. */
     private String openOnStartLabel() {
         String pkg = choices.getString(OpenOnStart.KEY, "");
@@ -362,6 +402,7 @@ public final class LauncherSettingsActivity extends Activity {
         openOnStartChoice.setText(getString(R.string.open_on_start_state, openOnStartLabel()));
         continueChoice.setText(getString(R.string.continue_row_state, getString(continueRow ? R.string.on : R.string.off)));
         nowPlayingChoice.setText(getString(R.string.now_playing_state, getString(nowPlaying ? R.string.on : R.string.off)));
+        screensaverChoice.setText(getString(R.string.screensaver_delay_state, delayLabel(screensaverMinutes())));
         settingsButtonChoice.setText(getString(R.string.settings_button_state,
                 getString(settingsButton ? R.string.on : R.string.off)));
         followThemeChoice.setSelected(!hasOnTvChoices());

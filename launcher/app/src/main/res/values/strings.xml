@@ -169,4 +169,8 @@
     <string name="settings_button_hidden">Hidden. The remote\'s Settings button opens these settings.</string>
     <string name="now_playing_state">Now playing: %1$s</string>
     <string name="now_playing">Now playing</string>
+    <string name="screensaver_delay_state">Screensaver starts after: %1$s</string>
+    <string name="screensaver_delay_label">Screensaver starts after</string>
+    <string name="screensaver_never">Never</string>
+    <string name="screensaver_minutes">%1$d min</string>
 </resources>

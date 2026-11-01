@@ -23,7 +23,8 @@ rebased on upstream regularly.
 
 In Launcher settings (hold OK on the gear, or Launcher settings in the remote's Settings panel), three rows switch
 `continue_watching_row`, `now_playing` and `show_settings_button` on the TV. Unlike upstream's choices there, a theme push keeps
-them: they are the owner's. Up from the continue-watching row reaches the top bar, and Down from the top bar the row.
+them: they are the owner's. With `WRITE_SETTINGS` granted as an app-op over ADB (`appops set com.gathin.tvhome WRITE_SETTINGS allow`), a row
+there sets when the TV's screensaver starts (`screen_off_timeout`: never, 5 to 60 minutes). Up from the continue-watching row reaches the top bar, and Down from the top bar the row.
 
 The Photos add-on (`addons/photo-screensaver`, `com.gathin.photodream`) also differs, in its card's slideshow: Left
 and Right step back and forth, OK switches the date taken on and off (the full date when the name carries the day),

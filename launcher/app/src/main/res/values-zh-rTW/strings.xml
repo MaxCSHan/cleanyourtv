@@ -117,4 +117,8 @@
     <string name="quick_apps_hint">重新啟用</string>
     <string name="now_playing_state">正在播放：%1$s</string>
     <string name="now_playing">正在播放</string>
+    <string name="screensaver_delay_state">螢幕保護程式啟動時間：%1$s</string>
+    <string name="screensaver_delay_label">螢幕保護程式啟動時間</string>
+    <string name="screensaver_never">永不</string>
+    <string name="screensaver_minutes">%1$d 分鐘</string>
 </resources>
