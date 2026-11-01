@@ -112,7 +112,8 @@ public final class SettingsPanelActivity extends Activity {
         if (config.dockRow) {
             rows.add(page(R.drawable.ic_dock, R.string.panel_dock,
                     join(getString(R.string.dock_opacity_label) + " " + config.dockOpacity + "%",
-                            spotlightName(config.dockUnfocusedOpacity)), this::dockPage));
+                            getString(R.string.row_state, getString(R.string.panel_spotlight),
+                                    spotlightName(config.dockUnfocusedOpacity))), this::dockPage));
         }
         rows.add(page(R.drawable.ic_photo_mark, R.string.panel_wallpaper, wallpaperSummary(), this::wallpaperPage));
         if (Settings.System.canWrite(this)) {
@@ -465,9 +466,9 @@ public final class SettingsPanelActivity extends Activity {
         return which;
     }
 
+    /** How much the other dock apps dim: Off, or 30% and up. */
     private String spotlightName(int alpha) {
-        return alpha >= 100 ? getString(R.string.row_state, getString(R.string.panel_spotlight), getString(R.string.off))
-                : getString(R.string.row_state, getString(R.string.panel_spotlight), (100 - alpha) + "%");
+        return alpha >= 100 ? getString(R.string.off) : (100 - alpha) + "%";
     }
 
     private String marginName(int dp) {

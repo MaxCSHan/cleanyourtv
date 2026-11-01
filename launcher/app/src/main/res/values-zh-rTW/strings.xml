@@ -128,7 +128,7 @@
     <string name="wallpaper_order_sequential">依拍攝日期</string>
     <string name="wallpaper_fade_label">淡入淡出</string>
     <string name="seconds_value">%1$.1f 秒</string>
-    <string name="dock_spotlight_label">Dock 焦點效果（淡化其他應用程式）</string>
+    <string name="dock_spotlight_label">焦點效果</string>
     <string name="dock_margin_label">Dock 位置</string>
     <string name="dock_margin_lowest">最低</string>
     <string name="dock_margin_low">低</string>

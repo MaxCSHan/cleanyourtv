@@ -180,7 +180,7 @@
     <string name="wallpaper_order_sequential">By date taken</string>
     <string name="wallpaper_fade_label">Crossfade</string>
     <string name="seconds_value">%1$.1f s</string>
-    <string name="dock_spotlight_label">Dock spotlight (dims the other apps)</string>
+    <string name="dock_spotlight_label">Spotlight</string>
     <string name="dock_margin_label">Dock position</string>
     <string name="dock_margin_lowest">Lowest</string>
     <string name="dock_margin_low">Low</string>
