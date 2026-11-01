@@ -33,6 +33,9 @@ import java.util.concurrent.Executors;
 final class WallpaperPlayer {
     private final FrameLayout root;
     private final ImageView image;
+    /** wallpaper_fade_ms: the previous picture, above image, faded out over the new one; null when off. */
+    private final ImageView fade;
+    private final int fadeMs;
     private final int backgroundColor;
     private final List<File> files;
     private final long interval;
@@ -88,12 +91,21 @@ final class WallpaperPlayer {
         image = new ImageView(context);
         image.setScaleType(ImageView.ScaleType.CENTER_CROP);
         image.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+        fadeMs = config.reducedMotion ? 0 : config.wallpaperFadeMs;
+        fade = fadeMs > 0 && interval > 0 ? new ImageView(context) : null;
         names = config.wallpaperCaptions && config.wallpaperEnabled && !files.isEmpty()
                 ? WallpaperCaptions.read(files.get(0).getParentFile()) : Collections.emptyMap();
         caption = names.isEmpty() ? null : makeCaption(context, root);
         if (config.wallpaperEnabled && !files.isEmpty()) {
             root.addView(image, 0, new FrameLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+            if (fade != null) {
+                fade.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                fade.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+                fade.setVisibility(View.GONE);
+                root.addView(fade, 1, new FrameLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+            }
             showFirst();
         }
     }
@@ -141,6 +153,11 @@ final class WallpaperPlayer {
     void releaseForMemoryPressure() {
         if (current == null) return;
         image.setImageDrawable(null);
+        if (fade != null) {
+            fade.animate().cancel();
+            fade.setImageDrawable(null);
+            fade.setVisibility(View.GONE);
+        }
         // The renderer may still have a queued frame that references this hardware bitmap. Drop our references and
         // let Android reclaim its native buffer after rendering releases it instead of recycling it mid-frame.
         current = null;
@@ -265,6 +282,21 @@ final class WallpaperPlayer {
         current = bitmap;
         // The wallpaper covers the whole root; avoid drawing the fallback colour under it.
         root.setBackground(null);
+        if (fade != null && old != null && old != bitmap) {
+            // The old picture moves to the view above and fades out over the new one, then is released. A change
+            // during a fade cancels it; the picture it held is left to the garbage collector.
+            fade.animate().cancel();
+            fade.setImageBitmap(old);
+            fade.setAlpha(1f);
+            fade.setVisibility(View.VISIBLE);
+            image.setImageBitmap(bitmap);
+            fade.animate().alpha(0f).setDuration(fadeMs).withEndAction(() -> {
+                fade.setImageDrawable(null);
+                fade.setVisibility(View.GONE);
+                fade.postDelayed(old::recycle, 500);
+            }).start();
+            return;
+        }
         image.setImageBitmap(bitmap);
         if (old != null && old != bitmap) image.postDelayed(old::recycle, 500);
     }
