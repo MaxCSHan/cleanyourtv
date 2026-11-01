@@ -160,6 +160,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private boolean dockOnlyHome;
     /** dock_title and continue_row_gap, for placing the continue-watching row. */
     private boolean dockTitle;
+    /** The dock's band, whose left edge the continue-watching row lines up with. */
+    private DockDecoration dockDecoration;
     private int continueRowGap;
     private LinearLayout heroDots;
     /** Cinematic top shelf (config.xml, cinematic_home): the focused dock app's artwork behind a larger shelf. */
@@ -691,7 +693,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             public void onChildViewDetachedFromWindow(@NonNull View v) {
             }
         });
-        if (dockRow) grid.addItemDecoration(new DockDecoration(COLUMNS, density, cinematic, cfg.alwaysShowNames || cfg.dockNameBelow, cfg.dockOpacity, cfg.dockGlass, cfg.dockEvenPadding, cfg.dockBand,
+        if (dockRow) grid.addItemDecoration(dockDecoration = new DockDecoration(COLUMNS, density, cinematic, cfg.alwaysShowNames || cfg.dockNameBelow, cfg.dockOpacity, cfg.dockGlass, cfg.dockEvenPadding, cfg.dockBand,
                 singleRow, cfg.dockBandAll));
         if (cfg.fadeRows) TopFade.attach(grid, 48 * density);
         // Reduced motion: the tiles are simply there, with no entrance (reloadApps skips it there too).
@@ -2124,6 +2126,16 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         if (continueShows.getChildCount() == 0) return;
         float under = dockTitle ? heroY : heroY + hero.getHeight() + 40 * density;
         continueRow.setY(under - continueRow.getHeight() - continueRowGap * density);
+        float bandLeft = dockDecoration == null ? Float.NaN : dockDecoration.bandLeft();
+        if (!Float.isNaN(bandLeft)) {
+            // The first pill's left edge on the band's (pills keep a start margin between them); the grid and the
+            // row sit in different parents.
+            int[] g = new int[2], p = new int[2];
+            grid.getLocationInWindow(g);
+            ((View) continueRow.getParent()).getLocationInWindow(p);
+            int firstPill = continueShows.getLeft() + continueShows.getChildAt(0).getLeft();
+            continueRow.setX(g[0] - p[0] + bandLeft - firstPill);
+        }
         continueRow.setVisibility(View.VISIBLE);
     }
 
