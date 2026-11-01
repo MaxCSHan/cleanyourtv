@@ -515,6 +515,15 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         if (!cinematic && cfg.dockTitle && cfg.continueWatchingDays > 0) {
             continueWatching = new ContinueWatching(this, cfg.continueWatchingDays);
             heroMeta.setVisibility(View.INVISIBLE);   // keeps its height, so the name does not jump when it fills in
+            // A soft dark halo, readable on a bright photo. The padding (taken back from the margins) leaves the blur
+            // room inside the view: a shadow cut off at the view's edge shows as a hard-edged box.
+            int halo = Math.round(10 * density);
+            heroMeta.setShadowLayer(halo, 0, 0, 0x99000000);
+            heroMeta.setPadding(halo, halo, halo, halo);
+            ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) heroMeta.getLayoutParams();
+            lp.setMarginStart(lp.getMarginStart() - halo);
+            lp.topMargin -= halo;
+            heroMeta.setLayoutParams(lp);
         }
         // dock_title false: the name above the dock (and the cinematic lines under it) never shows; the glow
         // still follows the dock.
