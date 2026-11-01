@@ -36,11 +36,18 @@ final class NowPlaying {
             this.player = player;
         }
 
+        boolean sameSong(Track t) {
+            return t != null && pkg.equals(t.pkg) && title.equals(t.title) && artist.equals(t.artist);
+        }
+
         // The cover by its pixels: Spotify sends a new song's title with the old cover, then the new cover alone.
         // Covers are icon-sized by then, so the comparison is cheap.
+        boolean sameCover(Track t) {
+            return t != null && (art == null ? t.art == null : t.art != null && art.sameAs(t.art));
+        }
+
         boolean sameAs(Track t) {
-            return t != null && pkg.equals(t.pkg) && title.equals(t.title) && artist.equals(t.artist)
-                    && (art == null ? t.art == null : t.art != null && art.sameAs(t.art));
+            return sameSong(t) && sameCover(t);
         }
     }
 
@@ -48,6 +55,8 @@ final class NowPlaying {
     private final ComponentName listener;
     private final Runnable onChange;
     private final int artPx;
+    /** How long a new song that still carries the last song's cover waits for its own. */
+    private static final long COVER_WAIT_MS = 1000;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final List<MediaController> watched = new ArrayList<>();
     private final MediaSessionManager.OnActiveSessionsChangedListener sessionsChanged = this::watch;
@@ -57,6 +66,9 @@ final class NowPlaying {
         @Override public void onSessionDestroyed() { update(); }
     };
     private Track track;
+    /** A new song held back until its cover arrives (or COVER_WAIT_MS passes), so title and cover change together. */
+    private Track pending;
+    private final Runnable publishPending = () -> publish(pending);
     private boolean started;
 
     NowPlaying(Context context, int artPx, Runnable onChange) {
@@ -88,6 +100,8 @@ final class NowPlaying {
         sessions.removeOnActiveSessionsChangedListener(sessionsChanged);
         for (MediaController c : watched) c.unregisterCallback(changed);
         watched.clear();
+        handler.removeCallbacks(publishPending);
+        pending = null;
     }
 
     private void watch(List<MediaController> controllers) {
@@ -114,7 +128,26 @@ final class NowPlaying {
             next = new Track(c.getPackageName(), title, artist, art(meta), c.getSessionActivity());
             break;
         }
-        if (next == null ? track == null : next.sameAs(track)) return;
+        if (next == null ? track == null : next.sameAs(track)) {
+            handler.removeCallbacks(publishPending);
+            pending = null;
+            return;
+        }
+        if (next != null && next.art != null && !next.sameSong(track) && next.sameCover(track)) {
+            // The new song with the old cover: wait for its own, from the first such update on.
+            if (!next.sameSong(pending)) {
+                handler.removeCallbacks(publishPending);
+                handler.postDelayed(publishPending, COVER_WAIT_MS);
+            }
+            pending = next;
+            return;
+        }
+        publish(next);
+    }
+
+    private void publish(Track next) {
+        handler.removeCallbacks(publishPending);
+        pending = null;
         track = next;
         onChange.run();
     }

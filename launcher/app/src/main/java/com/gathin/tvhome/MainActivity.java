@@ -30,6 +30,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.TransitionDrawable;
 import android.media.tv.TvContract;
 import android.media.tv.TvInputInfo;
 import android.media.tv.TvInputManager;
@@ -165,6 +166,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private DockDecoration dockDecoration;
     /** now_playing: the song playing, first in the continue-watching row; null when off. */
     private NowPlaying nowPlaying;
+    /** The playing song's pill in the row and the cover on it, for a change in place (onNowPlaying). */
+    private TextView nowPlayingPill;
+    private Drawable nowPlayingArt;
+    private static final int NOW_PLAYING_FADE_MS = 300;
     /** continue_watching_row: the shows are in the row (else it may hold only what plays). */
     private boolean showsInRow;
     private TextView continueTitle;
@@ -541,7 +546,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             continueRow = findViewById(R.id.continueRow);
             continueShows = findViewById(R.id.continueShows);
             continueTitle = findViewById(R.id.continueTitle);
-            if (cfg.nowPlaying) nowPlaying = new NowPlaying(this, Math.round(30 * density), this::fillContinueRow);
+            if (cfg.nowPlaying) nowPlaying = new NowPlaying(this, Math.round(30 * density), this::onNowPlaying);
         }
         if (showsInRow) {
             // The row shows the same shows, so the line under the name stays out and its room goes to the wallpaper.
@@ -2100,6 +2105,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         View focused = continueShows.getFocusedChild();
         int focusAt = focused == null ? -1 : continueShows.indexOfChild(focused);
         continueShows.removeAllViews();
+        nowPlayingPill = null;
+        nowPlayingArt = null;
         PackageManager pm = getPackageManager();
         int icon = Math.round(24 * density);
         addNowPlaying(pm);
@@ -2211,35 +2218,69 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private void addNowPlaying(PackageManager pm) {
         NowPlaying.Track track = nowPlaying == null ? null : nowPlaying.track();
         if (track == null) return;
-        Drawable art;
-        try {
-            art = track.art != null ? new BitmapDrawable(getResources(), track.art) : pm.getApplicationIcon(track.pkg);
-        } catch (PackageManager.NameNotFoundException e) {
-            return;
-        }
-        int size = Math.round((track.art != null ? 30 : 24) * density);
-        art.setBounds(0, 0, size, track.art != null ? size * track.art.getHeight() / track.art.getWidth() : size);
         TextView pill = (TextView) getLayoutInflater().inflate(R.layout.continue_show, continueShows, false);
-        pill.setText(track.artist.isEmpty() ? track.title : track.title + " · " + track.artist);
-        pill.setContentDescription(getString(R.string.now_playing) + ": " + pill.getText());
-        pill.setCompoundDrawables(art, null, null, null);
+        if (!bindNowPlaying(pill, track, false)) return;
         pill.setCompoundDrawableTintList(null);
-        pill.setTag(track.pkg);
         pill.setOnClickListener(v -> {
+            NowPlaying.Track now = nowPlaying.track();
+            if (now == null) return;
             try {
-                if (track.player != null) {
-                    track.player.send();
+                if (now.player != null) {
+                    now.player.send();
                     return;
                 }
             } catch (PendingIntent.CanceledException ignored) {
                 // The player is gone: open the app instead.
             }
-            Intent i = pm.getLeanbackLaunchIntentForPackage(track.pkg);
-            if (i == null) i = pm.getLaunchIntentForPackage(track.pkg);
+            Intent i = pm.getLeanbackLaunchIntentForPackage(now.pkg);
+            if (i == null) i = pm.getLaunchIntentForPackage(now.pkg);
             if (i != null) open(i);
         });
         pill.setOnKeyListener(this::onContinueKey);
         continueShows.addView(pill);
+        nowPlayingPill = pill;
+    }
+
+    /**
+     * now_playing changed. The next song from the same app changes the pill in place, its cover crossfaded and its
+     * text faded in; anything else (a song starts or stops, another app) builds the row again.
+     */
+    private void onNowPlaying() {
+        NowPlaying.Track track = nowPlaying.track();
+        if (track != null && nowPlayingPill != null && nowPlayingPill.getParent() == continueShows
+                && track.pkg.equals(nowPlayingPill.getTag()) && bindNowPlaying(nowPlayingPill, track, true)) return;
+        fillContinueRow();
+    }
+
+    /** Puts the track's cover (else its app's icon) and text on the pill; false if its app is gone. */
+    private boolean bindNowPlaying(TextView pill, NowPlaying.Track track, boolean fade) {
+        Drawable art;
+        try {
+            art = track.art != null ? new BitmapDrawable(getResources(), track.art) : getPackageManager().getApplicationIcon(track.pkg);
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+        int size = Math.round((track.art != null ? 30 : 24) * density);
+        art.setBounds(0, 0, size, track.art != null ? size * track.art.getHeight() / track.art.getWidth() : size);
+        if (fade && nowPlayingArt != null) {
+            TransitionDrawable cross = new TransitionDrawable(new Drawable[] {nowPlayingArt, art});
+            cross.setCrossFadeEnabled(true);
+            cross.setBounds(art.getBounds());
+            pill.setCompoundDrawables(cross, null, null, null);
+            cross.startTransition(NOW_PLAYING_FADE_MS);
+        } else {
+            pill.setCompoundDrawables(art, null, null, null);
+        }
+        nowPlayingArt = art;
+        String text = track.artist.isEmpty() ? track.title : track.title + " · " + track.artist;
+        if (fade && !text.contentEquals(pill.getText())) {
+            pill.setAlpha(0.5f);
+            pill.animate().alpha(1f).setDuration(NOW_PLAYING_FADE_MS).start();
+        }
+        pill.setText(text);
+        pill.setContentDescription(getString(R.string.now_playing) + ": " + text);
+        pill.setTag(track.pkg);
+        return true;
     }
 
     /**
