@@ -170,6 +170,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private TextView nowPlayingPill;
     private Drawable nowPlayingArt;
     private static final int NOW_PLAYING_FADE_MS = 300;
+    /** now_playing_keys: P+/P- skip songs while one shows. */
+    private boolean nowPlayingKeys;
     /** continue_watching_row: the shows are in the row (else it may hold only what plays). */
     private boolean showsInRow;
     private TextView continueTitle;
@@ -547,6 +549,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             continueShows = findViewById(R.id.continueShows);
             continueTitle = findViewById(R.id.continueTitle);
             if (cfg.nowPlaying) nowPlaying = new NowPlaying(this, Math.round(30 * density), this::onNowPlaying);
+            nowPlayingKeys = cfg.nowPlaying && cfg.nowPlayingKeys;
         }
         if (showsInRow) {
             // The row shows the same shows, so the line under the name stays out and its room goes to the wallpaper.
@@ -1468,6 +1471,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         if (resumed && event.getKeyCode() >= 1000 && RemoteKeys.handle(this, event, homeAppKeys.get(event.getKeyCode()),
                 homeHoldAppKeys.get(event.getKeyCode()))) return true;
         if (handleSettingsKey(event)) return true;
+        if (skipSongKey(event)) return true;
         if (holdOk(event)) return true;
         if (tileMenuEnabled && !reordering && openPopup == null && cardPrompt == null
                 && event.getKeyCode() == KeyEvent.KEYCODE_MENU) {
@@ -2239,6 +2243,15 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         pill.setOnKeyListener(this::onContinueKey);
         continueShows.addView(pill);
         nowPlayingPill = pill;
+    }
+
+    /** now_playing_keys: P+ the next song, P- the previous one, once per press; other keys and no song pass on. */
+    private boolean skipSongKey(KeyEvent event) {
+        int code = event.getKeyCode();
+        if (!nowPlayingKeys || nowPlaying == null
+                || (code != KeyEvent.KEYCODE_CHANNEL_UP && code != KeyEvent.KEYCODE_CHANNEL_DOWN)) return false;
+        if (event.getAction() != KeyEvent.ACTION_DOWN || event.getRepeatCount() > 0) return nowPlaying.track() != null;
+        return nowPlaying.skip(code == KeyEvent.KEYCODE_CHANNEL_UP);
     }
 
     /**

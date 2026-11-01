@@ -66,6 +66,8 @@ final class NowPlaying {
         @Override public void onSessionDestroyed() { update(); }
     };
     private Track track;
+    /** The session of what plays now, for skip(); it can be ahead of track while a new song waits for its cover. */
+    private MediaController playing;
     /** A new song held back until its cover arrives (or COVER_WAIT_MS passes), so title and cover change together. */
     private Track pending;
     private final Runnable publishPending = () -> publish(pending);
@@ -118,6 +120,7 @@ final class NowPlaying {
 
     private void update() {
         Track next = null;
+        playing = null;
         for (MediaController c : watched) {
             PlaybackState state = c.getPlaybackState();
             MediaMetadata meta = c.getMetadata();
@@ -126,6 +129,7 @@ final class NowPlaying {
             if (title.isEmpty()) continue;
             String artist = text(meta, MediaMetadata.METADATA_KEY_ARTIST, MediaMetadata.METADATA_KEY_ALBUM_ARTIST);
             next = new Track(c.getPackageName(), title, artist, art(meta), c.getSessionActivity());
+            playing = c;
             break;
         }
         if (next == null ? track == null : next.sameAs(track)) {
@@ -150,6 +154,15 @@ final class NowPlaying {
         pending = null;
         track = next;
         onChange.run();
+    }
+
+    /** now_playing_keys: the next song (or the previous one); false when nothing plays. */
+    boolean skip(boolean forward) {
+        if (playing == null) return false;
+        MediaController.TransportControls controls = playing.getTransportControls();
+        if (forward) controls.skipToNext();
+        else controls.skipToPrevious();
+        return true;
     }
 
     private static String text(MediaMetadata meta, String key, String fallback) {
