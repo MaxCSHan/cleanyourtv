@@ -104,4 +104,15 @@
     <string name="continue_row_state">繼續觀看：%1$s</string>
     <string name="settings_button_state">主畫面設定按鈕：%1$s</string>
     <string name="settings_button_hidden">已隱藏。按遙控器的設定鍵即可回到這裡。</string>
+    <string name="good_forenoon">早安</string>
+    <string name="rows_below_dock_label">Dock 下方列數</string>
+    <string name="wallpaper_label">桌布</string>
+    <string name="wallpaper_state">桌布：%1$s</string>
+    <string name="wallpaper_none">無</string>
+    <string name="wallpaper_applied">已更換桌布</string>
+    <string name="wallpaper_theme_default">依主題</string>
+    <string name="quick_picture">畫面</string>
+    <string name="quick_network">網路</string>
+    <string name="quick_apps">應用程式</string>
+    <string name="quick_apps_hint">重新啟用</string>
 </resources>
