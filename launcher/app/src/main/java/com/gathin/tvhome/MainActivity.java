@@ -152,6 +152,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private TextView heroMeta;
     /** continue_watching_days: the unfinished show under the shelf's name, or null when off. */
     private ContinueWatching continueWatching;
+    /** continue_watching_row: the shows above the shelf, or null when off. */
+    private LinearLayout continueRow, continueShows;
     private LinearLayout heroDots;
     /** Cinematic top shelf (config.xml, cinematic_home): the focused dock app's artwork behind a larger shelf. */
     private boolean cinematic;
@@ -524,6 +526,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             lp.setMarginStart(lp.getMarginStart() - halo);
             lp.topMargin -= halo;
             heroMeta.setLayoutParams(lp);
+            if (cfg.continueWatchingRow) {
+                continueRow = findViewById(R.id.continueRow);
+                continueShows = findViewById(R.id.continueShows);
+            }
         }
         // dock_title false: the name above the dock (and the cinematic lines under it) never shows; the glow
         // still follows the dock.
@@ -1099,6 +1105,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         if (continueWatching != null) {
             continueWatching.refresh(() -> {
                 if (heroShown && lastFocused < adapter.appCount()) updateContinueLine(lastFocused);
+                if (continueRow != null) fillContinueRow();
             });
         }
         // The network and Inputs pills keep their state while Home is in the background, and callbacks update them
@@ -1881,6 +1888,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         float y = dockTopInRoot - 14 * density - 26 * density - hero.getHeight();
         boolean changed = !label.contentEquals(heroName.getText());
         if (cinematic && heroArtAlpha > 0f) showHeroArt(position);
+        if (continueRow != null) placeContinueRow(y);
 
         if (!animations || reducedMotion) {
             // Snap the shelf instead of sliding and fading it: each of those frames repaints the
@@ -2034,6 +2042,87 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         heroMeta.setVisibility(line == null ? View.INVISIBLE : View.VISIBLE);
     }
 
+    /** continue_watching_row: one pill per show, the app's icon before its text; hidden when there is none. */
+    private void fillContinueRow() {
+        continueShows.removeAllViews();
+        PackageManager pm = getPackageManager();
+        int icon = Math.round(24 * density);
+        for (ContinueWatching.Item item : continueWatching.items()) {
+            TextView show = (TextView) getLayoutInflater().inflate(R.layout.continue_show, continueShows, false);
+            show.setText(item.text);
+            show.setTag(item.pkg);
+            try {
+                Drawable d = pm.getApplicationIcon(item.pkg);
+                d.setBounds(0, 0, icon, icon);
+                show.setCompoundDrawables(d, null, null, null);
+                show.setCompoundDrawableTintList(null);   // the pill style tints its icons; an app icon keeps its colours
+            } catch (PackageManager.NameNotFoundException e) {
+                continue;   // the app is gone
+            }
+            show.setOnClickListener(v -> resume(item));
+            show.setOnKeyListener((v, keyCode, event) -> {
+                if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
+                    if (event.getAction() == KeyEvent.ACTION_DOWN) focusTile(lastFocused);
+                    return true;
+                }
+                // The row's two ends: focus stays rather than jumping to whatever lies beyond.
+                if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT) return v == continueShows.getChildAt(0);
+                return keyCode == KeyEvent.KEYCODE_DPAD_RIGHT
+                        && v == continueShows.getChildAt(continueShows.getChildCount() - 1);
+            });
+            continueShows.addView(show);
+        }
+        if (continueShows.getChildCount() == 0) {
+            continueRow.setVisibility(View.GONE);
+            return;
+        }
+        // Place it once it is measured, if the shelf is up.
+        continueRow.setVisibility(View.INVISIBLE);
+        continueRow.post(() -> {
+            if (heroShown) placeContinueRow(hero.getY());
+        });
+    }
+
+    /** Puts the row above the shelf at heroY and shows it, if it holds any show. */
+    private void placeContinueRow(float heroY) {
+        if (continueShows.getChildCount() == 0) return;
+        continueRow.setY(heroY - continueRow.getHeight() - 20 * density);
+        continueRow.setVisibility(View.VISIBLE);
+    }
+
+    /** Up from the dock: the show of the app it came from, else the first. False when the row is not up. */
+    private boolean focusContinueRow(int position) {
+        if (continueRow == null || continueRow.getVisibility() != View.VISIBLE) return false;
+        View target = continueShows.findViewWithTag(adapter.packageAt(position));
+        if (target == null) target = continueShows.getChildAt(0);
+        return target != null && target.requestFocus();
+    }
+
+    /**
+     * Opens the show's own link, held to the app that wrote it: a row can only open its own app, with no URI
+     * grants. Without a link, or if the app refuses it, the app opens as from its tile.
+     */
+    private void resume(ContinueWatching.Item item) {
+        try {
+            Intent i = Intent.parseUri(item.link, Intent.URI_INTENT_SCHEME);
+            if (i.getComponent() != null && !item.pkg.equals(i.getComponent().getPackageName())) i.setComponent(null);
+            i.setSelector(null);
+            i.setPackage(item.pkg);
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(i);
+            return;
+        } catch (Exception e) {
+            // No link, a malformed one, or nothing in the app answers it.
+        }
+        Intent launch = getPackageManager().getLeanbackLaunchIntentForPackage(item.pkg);
+        if (launch == null) launch = getPackageManager().getLaunchIntentForPackage(item.pkg);
+        if (launch == null) return;
+        try {
+            startActivity(launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        } catch (ActivityNotFoundException ignored) {
+        }
+    }
+
     /** "Last opened yesterday, 9:40 PM", the time in white; nothing (but the same height) when it was never seen. */
     private void updateHeroMeta(int position) {
         long when = LastOpened.get(this, adapter.packageAt(position));
@@ -2170,6 +2259,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         heroArt.animate().cancel();
         heroArt.setAlpha(0f);
         heroShown = false;
+        if (continueRow != null) continueRow.setVisibility(View.INVISIBLE);
         if (!ambientGlow) return;
         if (!animations || reducedMotion) {
             setAmbient(color);
@@ -2194,6 +2284,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         ambient.animate().cancel();
         heroArt.animate().cancel();
         heroShown = false;
+        if (continueRow != null) continueRow.setVisibility(View.INVISIBLE);
         if (animations && !reducedMotion) {
             hero.animate().alpha(0f).setDuration(160).start();
             if (ambientGlow) ambient.animate().alpha(0f).setDuration(300).start();
@@ -2435,7 +2526,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                     rtlAppGrid, keyCode == KeyEvent.KEYCODE_DPAD_LEFT);
         }
         if (keyCode == KeyEvent.KEYCODE_DPAD_UP) {
-            if (position < COLUMNS) return false;          // dock row: let focus move to the top bar
+            if (position < COLUMNS) return focusContinueRow(position);   // dock row: the continue row, else the top bar
             target = position - COLUMNS;
         } else {
             int lastRowStart = ((count - 1) / COLUMNS) * COLUMNS;

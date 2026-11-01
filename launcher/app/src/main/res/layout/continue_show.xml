@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One show in the continue_watching_row: a pill like the top bar's, the app's icon set in MainActivity. -->
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/TopButton"
+    android:maxWidth="520dp"
+    android:singleLine="true"
+    android:ellipsize="end" />

@@ -138,6 +138,8 @@ final class Config {
     final int wallpaperFadeMs;
     /** continue_watching_days: a dock app's unfinished show under its name, from rows this many days old at most; 0 off. */
     final int continueWatchingDays;
+    /** continue_watching_row: the newest unfinished shows from every app as a row above the shelf; needs the days. */
+    final boolean continueWatchingRow;
     /** App library as a round button in the top bar (config.xml library_button); needs app_library. */
     final boolean libraryButton;
     /** The App library pill after the last Home row; false hides it while libraryButton is on (show_library_pill). */
@@ -291,7 +293,7 @@ final class Config {
                    boolean handleViewInputs, boolean tileMenu, boolean dockEvenPadding, boolean dockBand, boolean cinematicDots, boolean cinematicWhiteFocus, boolean wifiStatusColor, int cinematicScrim, int cinematicArt,
                    Map<String, Set<String>> wallpaperMoods, boolean gamepadPassthrough, boolean consumeVolumeKeys, boolean powerOnHome, boolean homeLongPressHome, boolean wifiStatusWarnings, List<String> topBarApps, boolean showGreeting, boolean headerWhite, boolean clockWallpaper, int clockWallpaperDim, boolean clockGlow, String glassStyle, boolean singleRow, boolean dockBandAll, boolean lunarDate, int lunarUtcOffset, boolean dateBelowClock, boolean vpnPill, String locale, boolean powerOnHomeAlways, boolean inputsConnectedOnly,
                    int openOnStartNetworkWait, boolean iconOnlyVpn, String clockFormat, boolean backOpensClock,
-                   int wallpaperFadeMs, int continueWatchingDays) {
+                   int wallpaperFadeMs, int continueWatchingDays, boolean continueWatchingRow) {
         this.handleViewInputs = handleViewInputs;
         this.tileMenu = tileMenu;
         this.inputKeycodes = inputKeycodes;
@@ -344,6 +346,7 @@ final class Config {
         this.backOpensClock = backOpensClock;
         this.wallpaperFadeMs = wallpaperFadeMs;
         this.continueWatchingDays = continueWatchingDays;
+        this.continueWatchingRow = continueWatchingRow;
         this.libraryButton = libraryButton;
         this.showLibraryPill = showLibraryPill;
         this.wifiLabelWidth = wifiLabelWidth;
@@ -473,6 +476,7 @@ final class Config {
         boolean backOpensClock = res.getBoolean(R.bool.back_opens_clock);
         int wallpaperFadeMs = res.getInteger(R.integer.wallpaper_fade_ms);
         int continueWatchingDays = res.getInteger(R.integer.continue_watching_days);
+        boolean continueWatchingRow = res.getBoolean(R.bool.continue_watching_row);
         boolean libraryButton = res.getBoolean(R.bool.library_button);
         boolean showLibraryPill = res.getBoolean(R.bool.show_library_pill);
         int wifiLabelWidth = res.getInteger(R.integer.wifi_label_width);
@@ -586,6 +590,7 @@ final class Config {
             backOpensClock = bool(json, "back_opens_clock", backOpensClock);
             wallpaperFadeMs = integer(json, "wallpaper_fade_ms", wallpaperFadeMs, 0, 3000);
             continueWatchingDays = integer(json, "continue_watching_days", continueWatchingDays, 0, 90);
+            continueWatchingRow = bool(json, "continue_watching_row", continueWatchingRow);
             libraryButton = bool(json, "library_button", libraryButton);
             showLibraryPill = bool(json, "show_library_pill", showLibraryPill);
             wifiLabelWidth = integer(json, "wifi_label_width", wifiLabelWidth, 0, 300);
@@ -712,7 +717,8 @@ final class Config {
                 Math.max(0, Math.min(90, clockWallpaperDim)), clockGlow, glassStyle, singleRow && dockRow, dockBandAll, lunar, lunarOffset,
                 dateBelowClock, vpnPill, locale, powerOnHomeAlways, inputsConnectedOnly,
                 Math.max(0, Math.min(600, openOnStartNetworkWait)), iconOnlyVpn, clockFormat, backOpensClock,
-                Math.max(0, Math.min(3000, wallpaperFadeMs)), Math.max(0, Math.min(90, continueWatchingDays)));
+                Math.max(0, Math.min(3000, wallpaperFadeMs)), Math.max(0, Math.min(90, continueWatchingDays)),
+                continueWatchingRow);
     }
 
     /**

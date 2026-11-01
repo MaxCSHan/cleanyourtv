@@ -156,6 +156,44 @@
             android:visibility="gone" />
     </LinearLayout>
 
+    <!-- continue_watching_row: the newest unfinished shows from every app, above the shelf and shown with it;
+         positioned in code. Up from the dock reaches it, OK on a show resumes it. The title's padding leaves its
+         shadow room: a shadow cut off at the view's edge shows as a hard-edged box. -->
+    <LinearLayout
+        android:id="@+id/continueRow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="58dp"
+        android:orientation="vertical"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:padding="8dp"
+            android:text="@string/continue_row"
+            android:shadowColor="#99000000"
+            android:shadowRadius="16"
+            android:singleLine="true"
+            android:textColor="#D9FFFFFF"
+            android:textSize="12sp"
+            android:fontFamily="@string/font_medium"
+            android:letterSpacing="0.22"
+            android:textAllCaps="true" />
+
+        <LinearLayout
+            android:id="@+id/continueShows"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:orientation="horizontal"
+            android:clipChildren="false"
+            android:clipToPadding="false" />
+    </LinearLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"

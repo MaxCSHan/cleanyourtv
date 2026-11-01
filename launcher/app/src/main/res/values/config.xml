@@ -371,6 +371,12 @@
          (adb shell pm grant com.gathin.tvhome android.permission.READ_TV_LISTINGS); without it nothing shows.
          Not on the cinematic shelf. Can also be set with "continue_watching_days". -->
     <integer name="continue_watching_days">0</integer>
+    <!-- With continue_watching_days on: the newest unfinished shows from every app (up to 5, within those days) as a
+         row of pills above the shelf, each with its app's icon. Up from the dock reaches it, Down goes back, and OK
+         resumes the show through the link its app wrote, opening the app normally when there is none; OK on a dock
+         app still opens the app as usual. Hidden when nothing is unfinished. Can also be set with
+         "continue_watching_row". -->
+    <bool name="continue_watching_row">false</bool>
     <!-- Rotating wallpapers: show each picture's name under the top-right buttons, from a captions.txt next to the
          pictures in wallpapers/ ("01-dusk.jpg<TAB>Dusk over the peaks", one per line). A picture without a line
          shows no name. Can also be set with "wallpaper_captions": true in a theme's config.json. -->

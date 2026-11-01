@@ -157,6 +157,8 @@
     <string name="continue_watching">Continue: %1$s</string>
     <string name="continue_up_next">Up next: %1$s</string>
     <string name="continue_minutes_left">%1$d min left</string>
+    <!-- continue_watching_row: the small title over the row of unfinished shows. -->
+    <string name="continue_row">Continue watching</string>
     <!-- game_day: a game on now, in the race panel. -->
     <string name="game_live">Live now</string>
     <string name="clock_format_system">System</string>
