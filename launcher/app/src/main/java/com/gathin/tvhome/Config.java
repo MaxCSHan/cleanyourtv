@@ -144,6 +144,10 @@ final class Config {
     final boolean continueWatchingCovers;
     /** dock_title_size: the dock app's name above the dock, in sp. */
     final int dockTitleSize;
+    /** dock_only_home: while the dock is focused, the grid rows under it stay out of view. */
+    final boolean dockOnlyHome;
+    /** dock_name_below: the focused dock app's name under its tile, the band grown to hold it. */
+    final boolean dockNameBelow;
     /** App library as a round button in the top bar (config.xml library_button); needs app_library. */
     final boolean libraryButton;
     /** The App library pill after the last Home row; false hides it while libraryButton is on (show_library_pill). */
@@ -298,7 +302,8 @@ final class Config {
                    Map<String, Set<String>> wallpaperMoods, boolean gamepadPassthrough, boolean consumeVolumeKeys, boolean powerOnHome, boolean homeLongPressHome, boolean wifiStatusWarnings, List<String> topBarApps, boolean showGreeting, boolean headerWhite, boolean clockWallpaper, int clockWallpaperDim, boolean clockGlow, String glassStyle, boolean singleRow, boolean dockBandAll, boolean lunarDate, int lunarUtcOffset, boolean dateBelowClock, boolean vpnPill, String locale, boolean powerOnHomeAlways, boolean inputsConnectedOnly,
                    int openOnStartNetworkWait, boolean iconOnlyVpn, String clockFormat, boolean backOpensClock,
                    int wallpaperFadeMs, int continueWatchingDays, boolean continueWatchingRow,
-                   boolean continueWatchingCovers, int dockTitleSize) {
+                   boolean continueWatchingCovers, int dockTitleSize, boolean dockOnlyHome,
+                   boolean dockNameBelow) {
         this.handleViewInputs = handleViewInputs;
         this.tileMenu = tileMenu;
         this.inputKeycodes = inputKeycodes;
@@ -354,6 +359,8 @@ final class Config {
         this.continueWatchingRow = continueWatchingRow;
         this.continueWatchingCovers = continueWatchingCovers;
         this.dockTitleSize = dockTitleSize;
+        this.dockOnlyHome = dockOnlyHome;
+        this.dockNameBelow = dockNameBelow;
         this.libraryButton = libraryButton;
         this.showLibraryPill = showLibraryPill;
         this.wifiLabelWidth = wifiLabelWidth;
@@ -486,6 +493,8 @@ final class Config {
         boolean continueWatchingRow = res.getBoolean(R.bool.continue_watching_row);
         boolean continueWatchingCovers = res.getBoolean(R.bool.continue_watching_covers);
         int dockTitleSize = res.getInteger(R.integer.dock_title_size);
+        boolean dockOnlyHome = res.getBoolean(R.bool.dock_only_home);
+        boolean dockNameBelow = res.getBoolean(R.bool.dock_name_below);
         boolean libraryButton = res.getBoolean(R.bool.library_button);
         boolean showLibraryPill = res.getBoolean(R.bool.show_library_pill);
         int wifiLabelWidth = res.getInteger(R.integer.wifi_label_width);
@@ -602,6 +611,8 @@ final class Config {
             continueWatchingRow = bool(json, "continue_watching_row", continueWatchingRow);
             continueWatchingCovers = bool(json, "continue_watching_covers", continueWatchingCovers);
             dockTitleSize = integer(json, "dock_title_size", dockTitleSize, 24, 72);
+            dockOnlyHome = bool(json, "dock_only_home", dockOnlyHome);
+            dockNameBelow = bool(json, "dock_name_below", dockNameBelow);
             libraryButton = bool(json, "library_button", libraryButton);
             showLibraryPill = bool(json, "show_library_pill", showLibraryPill);
             wifiLabelWidth = integer(json, "wifi_label_width", wifiLabelWidth, 0, 300);
@@ -729,7 +740,8 @@ final class Config {
                 dateBelowClock, vpnPill, locale, powerOnHomeAlways, inputsConnectedOnly,
                 Math.max(0, Math.min(600, openOnStartNetworkWait)), iconOnlyVpn, clockFormat, backOpensClock,
                 Math.max(0, Math.min(3000, wallpaperFadeMs)), Math.max(0, Math.min(90, continueWatchingDays)),
-                continueWatchingRow, continueWatchingCovers, Math.max(24, Math.min(72, dockTitleSize)));
+                continueWatchingRow, continueWatchingCovers, Math.max(24, Math.min(72, dockTitleSize)),
+                dockOnlyHome, dockNameBelow);
     }
 
     /**

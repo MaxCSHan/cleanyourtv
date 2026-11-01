@@ -156,6 +156,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private LinearLayout continueRow, continueShows;
     /** continue_watching_covers: the row's shows as cover cards instead of pills. */
     private boolean continueCovers;
+    /** dock_only_home: while the dock is focused, no grid row peeks in under it. */
+    private boolean dockOnlyHome;
     private LinearLayout heroDots;
     /** Cinematic top shelf (config.xml, cinematic_home): the focused dock app's artwork behind a larger shelf. */
     private boolean cinematic;
@@ -516,8 +518,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         cinematicWhiteFocus = cfg.cinematicWhiteFocus;
         heroArtAlpha = cfg.cinematicArt / 100f;
         if (cinematic) setUpCinematicShelf(cfg.cinematicScrim);
+        dockOnlyHome = cfg.dockOnlyHome;
         if (cfg.dockTitleSize != 48) heroName.setTextSize(TypedValue.COMPLEX_UNIT_SP, cfg.dockTitleSize);
-        if (!cinematic && cfg.dockTitle && cfg.continueWatchingDays > 0 && cfg.continueWatchingRow) {
+        // The row sits above the dock with or without the name over it (dock_title).
+        if (!cinematic && cfg.continueWatchingDays > 0 && cfg.continueWatchingRow) {
             // The row shows the same shows, so the line under the name stays out and its room goes to the wallpaper.
             continueCovers = cfg.continueWatchingCovers;
             continueWatching = new ContinueWatching(this, cfg.continueWatchingDays, continueCovers);
@@ -682,7 +686,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             public void onChildViewDetachedFromWindow(@NonNull View v) {
             }
         });
-        if (dockRow) grid.addItemDecoration(new DockDecoration(COLUMNS, density, cinematic, cfg.alwaysShowNames, cfg.dockOpacity, cfg.dockGlass, cfg.dockEvenPadding, cfg.dockBand,
+        if (dockRow) grid.addItemDecoration(new DockDecoration(COLUMNS, density, cinematic, cfg.alwaysShowNames || cfg.dockNameBelow, cfg.dockOpacity, cfg.dockGlass, cfg.dockEvenPadding, cfg.dockBand,
                 singleRow, cfg.dockBandAll));
         if (cfg.fadeRows) TopFade.attach(grid, 48 * density);
         // Reduced motion: the tiles are simply there, with no entrance (reloadApps skips it there too).
@@ -1859,7 +1863,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                 else grid.smoothScrollBy(0, dy);
             }
             showHero(position, scroll ? r.top - dy : r.top);
+            // dock_only_home: the rows under the dock sit in the grid's bottom padding; clipping it keeps them out.
+            if (dockOnlyHome) grid.setClipToPadding(true);
         } else {
+            if (dockOnlyHome) grid.setClipToPadding(false);
             // Below the dock (or in a plain grid) the glow follows the tile without the big name; letting it
             // fade out left the grid on plain black.
             showGlowOnly(position);

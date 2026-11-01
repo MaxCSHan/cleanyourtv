@@ -385,6 +385,12 @@
     <!-- The dock app's name above the dock, in sp, 24 to 72; 48 by default. Smaller leaves more of the wallpaper
          in view. Can also be set with "dock_title_size". -->
     <integer name="dock_title_size">48</integer>
+    <!-- While the dock is focused, the top of the next grid row no longer peeks in under it, so Home is the
+         wallpaper, the clock and the dock; Down still goes to the grid. Can also be set with "dock_only_home". -->
+    <bool name="dock_only_home">false</bool>
+    <!-- The focused dock app's name under its tile, as in the grid; the dock's band grows to hold it. With dock_title
+         false it replaces the large name above the dock. Can also be set with "dock_name_below". -->
+    <bool name="dock_name_below">false</bool>
     <!-- Rotating wallpapers: show each picture's name under the top-right buttons, from a captions.txt next to the
          pictures in wallpapers/ ("01-dusk.jpg<TAB>Dusk over the peaks", one per line). A picture without a line
          shows no name. Can also be set with "wallpaper_captions": true in a theme's config.json. -->
