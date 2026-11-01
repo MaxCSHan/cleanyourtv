@@ -36,9 +36,11 @@ final class NowPlaying {
             this.player = player;
         }
 
+        // The cover by its pixels: Spotify sends a new song's title with the old cover, then the new cover alone.
+        // Covers are icon-sized by then, so the comparison is cheap.
         boolean sameAs(Track t) {
             return t != null && pkg.equals(t.pkg) && title.equals(t.title) && artist.equals(t.artist)
-                    && (art == null) == (t.art == null);
+                    && (art == null ? t.art == null : t.art != null && art.sameAs(t.art));
         }
     }
 
