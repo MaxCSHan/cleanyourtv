@@ -197,8 +197,10 @@ rollback_home() {
 # system_server (see examples/xiaomi-tv-a-pro-2026). So check where Home ended up, and put the
 # stock launcher back if it is not ours.
 HOME_NOW=$(query_home)
-case "$HOME_NOW" in
-  com.gathin.tvhome/*) echo "Home now resolves to $HOME_NOW" ;;
+case "$STOCK_LAUNCHER:$HOME_NOW" in
+  *:com.gathin.tvhome/*) echo "Home now resolves to $HOME_NOW" ;;
+  # STOCK_LAUNCHER=none keeps the stock launcher as Home on purpose (stock_home_redirect): nothing was disabled.
+  none:?*) echo "Home stays $HOME_NOW (STOCK_LAUNCHER=none)" ;;
   *)
     if [ -z "$HOME_NOW" ]; then
       echo "ERROR: the TV stopped answering while Home was being switched, so the outcome is unknown." >&2
