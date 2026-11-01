@@ -148,6 +148,8 @@ final class Config {
     final boolean dockOnlyHome;
     /** dock_name_below: the focused dock app's name under its tile, the band grown to hold it. */
     final boolean dockNameBelow;
+    /** dock_unfocused_opacity: the dock's other tiles at this opacity, in percent; 100 is off. */
+    final int dockUnfocusedOpacity;
     /** App library as a round button in the top bar (config.xml library_button); needs app_library. */
     final boolean libraryButton;
     /** The App library pill after the last Home row; false hides it while libraryButton is on (show_library_pill). */
@@ -303,7 +305,7 @@ final class Config {
                    int openOnStartNetworkWait, boolean iconOnlyVpn, String clockFormat, boolean backOpensClock,
                    int wallpaperFadeMs, int continueWatchingDays, boolean continueWatchingRow,
                    boolean continueWatchingCovers, int dockTitleSize, boolean dockOnlyHome,
-                   boolean dockNameBelow) {
+                   boolean dockNameBelow, int dockUnfocusedOpacity) {
         this.handleViewInputs = handleViewInputs;
         this.tileMenu = tileMenu;
         this.inputKeycodes = inputKeycodes;
@@ -361,6 +363,7 @@ final class Config {
         this.dockTitleSize = dockTitleSize;
         this.dockOnlyHome = dockOnlyHome;
         this.dockNameBelow = dockNameBelow;
+        this.dockUnfocusedOpacity = dockUnfocusedOpacity;
         this.libraryButton = libraryButton;
         this.showLibraryPill = showLibraryPill;
         this.wifiLabelWidth = wifiLabelWidth;
@@ -495,6 +498,7 @@ final class Config {
         int dockTitleSize = res.getInteger(R.integer.dock_title_size);
         boolean dockOnlyHome = res.getBoolean(R.bool.dock_only_home);
         boolean dockNameBelow = res.getBoolean(R.bool.dock_name_below);
+        int dockUnfocusedOpacity = res.getInteger(R.integer.dock_unfocused_opacity);
         boolean libraryButton = res.getBoolean(R.bool.library_button);
         boolean showLibraryPill = res.getBoolean(R.bool.show_library_pill);
         int wifiLabelWidth = res.getInteger(R.integer.wifi_label_width);
@@ -613,6 +617,7 @@ final class Config {
             dockTitleSize = integer(json, "dock_title_size", dockTitleSize, 24, 72);
             dockOnlyHome = bool(json, "dock_only_home", dockOnlyHome);
             dockNameBelow = bool(json, "dock_name_below", dockNameBelow);
+            dockUnfocusedOpacity = integer(json, "dock_unfocused_opacity", dockUnfocusedOpacity, 30, 100);
             libraryButton = bool(json, "library_button", libraryButton);
             showLibraryPill = bool(json, "show_library_pill", showLibraryPill);
             wifiLabelWidth = integer(json, "wifi_label_width", wifiLabelWidth, 0, 300);
@@ -741,7 +746,7 @@ final class Config {
                 Math.max(0, Math.min(600, openOnStartNetworkWait)), iconOnlyVpn, clockFormat, backOpensClock,
                 Math.max(0, Math.min(3000, wallpaperFadeMs)), Math.max(0, Math.min(90, continueWatchingDays)),
                 continueWatchingRow, continueWatchingCovers, Math.max(24, Math.min(72, dockTitleSize)),
-                dockOnlyHome, dockNameBelow);
+                dockOnlyHome, dockNameBelow, Math.max(30, Math.min(100, dockUnfocusedOpacity)));
     }
 
     /**

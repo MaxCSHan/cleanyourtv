@@ -391,6 +391,10 @@
     <!-- The focused dock app's name under its tile, as in the grid; the dock's band grows to hold it. With dock_title
          false it replaces the large name above the dock. Can also be set with "dock_name_below". -->
     <bool name="dock_name_below">false</bool>
+    <!-- A spotlight on the dock: its other tiles rest at this opacity, in percent (30 to 100), and the focused one at
+         full, so the choice stands out over a wallpaper. The grid is not dimmed. 100 (the default) is off. Can also
+         be set with "dock_unfocused_opacity". -->
+    <integer name="dock_unfocused_opacity">100</integer>
     <!-- Rotating wallpapers: show each picture's name under the top-right buttons, from a captions.txt next to the
          pictures in wallpapers/ ("01-dusk.jpg<TAB>Dusk over the peaks", one per line). A picture without a line
          shows no name. Can also be set with "wallpaper_captions": true in a theme's config.json. -->

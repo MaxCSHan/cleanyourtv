@@ -176,6 +176,8 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final boolean dockTitle;
     /** dock_name_below: the focused dock app's name under its tile, as in the grid. */
     private final boolean dockNameBelow;
+    /** dock_unfocused_opacity: the dock's other tiles at this alpha, so the focused one stands out; 1 is off. */
+    private final float dockRestAlpha;
     /** The owner's saved order (reorder button, Order): key -> rank. Empty when there is none or it no longer applies. */
     private Map<String, Integer> savedRanks = Collections.emptyMap();
     /** Dock size recorded with the saved order (Order.docked), or -1: then dock_apps says which tiles are docked. */
@@ -241,6 +243,7 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         this.rowsBelowDock = cfg.rowsBelowDock;
         this.dockTitle = cfg.dockTitle;
         this.dockNameBelow = cfg.dockNameBelow;
+        this.dockRestAlpha = cfg.dockUnfocusedOpacity / 100f;
         this.dockRow = cfg.dockRow;
         this.singleRow = cfg.singleRow;
         this.restNameAlpha = cfg.alwaysShowNames ? 0.75f : 0f;
@@ -483,7 +486,9 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         boolean dockKind = DockSlots.inDockRow(dockRow, singleRow, position, dockSize);
         h.name.setVisibility(dockKind && restNameAlpha == 0f && !dockNameBelow ? View.INVISIBLE : View.VISIBLE);
         h.inDock = dockKind;
+        h.restAlpha = dockKind ? dockRestAlpha : 1f;
         boolean focused = h.card.isFocused();   // a rebind after reload() can hit the focused tile
+        h.card.setAlpha(focused ? 1f : h.restAlpha);
         h.name.setAlpha(focused ? 1f : restNameAlpha);
         h.card.setScaleX(focused && animations ? focusScale() : 1f);
         h.card.setScaleY(focused && animations ? focusScale() : 1f);
@@ -918,6 +923,8 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         final boolean overshoot;
         /** A dock tile: it grows in place without advanced_effects' lift, which reads as off-centre in the band (#2135). */
         boolean inDock;
+        /** The card's alpha while not focused: below 1 for dock tiles with dock_unfocused_opacity. */
+        float restAlpha = 1f;
 
         Holder(View v, TileListener listener, boolean animations, boolean advancedEffects,
                boolean reducedMotion, float restNameAlpha, boolean overshoot) {
@@ -996,6 +1003,11 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     name.animate().alpha(focused ? 1f : restNameAlpha)
                             .translationY(focused ? density * 4f : -density * 6f)
                             .setDuration(220).start();
+                }
+                if (restAlpha < 1f) {
+                    // A property of its own: it runs beside the zoom started above without cancelling it.
+                    if (!animations || reducedMotion) view.setAlpha(focused ? 1f : restAlpha);
+                    else view.animate().alpha(focused ? 1f : restAlpha).setDuration(focused ? 200 : 260).start();
                 }
                 int pos = getBindingAdapterPosition();
                 if (focused && listener != null && pos != RecyclerView.NO_POSITION) {

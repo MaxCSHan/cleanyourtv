@@ -14,6 +14,7 @@ rebased on upstream regularly.
 | `dock_title_size` | 24 to 72: the dock app's name above the dock, in sp (default 48) |
 | `dock_only_home` | while the dock is focused, the next grid row no longer peeks in under it; Down still reaches the grid (default false) |
 | `dock_name_below` | the focused dock app's name under its tile, as in the grid; with `dock_title` false it replaces the large name above the dock (default false) |
+| `dock_unfocused_opacity` | 30 to 100: the dock's other tiles at this opacity so the focused one stands out; the grid is not dimmed (default 100, off) |
 
 Nothing else differs: no network access and the same `minSdk`. The APK may pass upstream's 576 KB gate, up to 600 KB.
 One permission is added: `READ_TV_LISTINGS`, used only by the two continue-watching switches and granted over ADB
