@@ -1938,6 +1938,20 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         int h = (int) (card.getHeight() * scale + 2 * pad);
         if (!glassShown || card.getWidth() != glassCardW || glass.getWidth() != w || glass.getHeight() != h) {
             onTileFocused(pos, card);
+            return;
+        }
+        // The tile moved under a glass of the right size: on a cold start the grid's top padding (the dock pushed
+        // down) is set after the first focus, which moves the tiles by layout, not by a scroll the glass follows.
+        // Snap it back onto the tile, as onTileFocused places it.
+        Rect r = tileRect;
+        r.set(0, 0, card.getWidth(), card.getHeight());
+        root.offsetDescendantRectToMyCoords(card, r);
+        boolean lifted = advancedEffects && !DockSlots.inDockRow(dockRow, singleRow, pos, COLUMNS);
+        float x = r.exactCenterX() - (card.getWidth() * scale + 2 * pad) / 2f;
+        float y = r.exactCenterY() - (card.getHeight() * scale + 2 * pad) / 2f - (lifted ? 4f * density : 0f);
+        if (Math.abs(x - glassTargetX) > 1f || Math.abs(y - glassTargetY) > 1f) {
+            glassShown = false;
+            onTileFocused(pos, card);
         }
     }
 
