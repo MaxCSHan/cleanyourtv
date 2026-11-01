@@ -20,10 +20,11 @@ rebased on upstream regularly.
 | `show_settings_button` | false hides the gear at the top right; Settings is then the remote's Settings button (`settings_key_keycodes`, with `settings_key_panel` a panel that includes Launcher settings); without one the gear always shows (default true) |
 | `now_playing` | what plays while Home shows (Spotify and the like) as the continue-watching row's first pill, alone there (titled Now playing) when `continue_watching_row` is off, with the song, the artist and the cover the app hands over; OK opens its player. Read from the TV's media sessions, offline; needs notification-listener access for `NowPlayingListener`, granted over ADB (default false) |
 | `home_dates` | today's date under the clock clearer (16sp, brighter), and a wallpaper's caption from `captions.txt` (a date taken) on the same line at the right, same font, softer, after a photo mark (default false) |
+| `keep_tv_choices` | what the owner picks in Launcher settings stays theirs: a theme push no longer clears it. The choices are written to `choices.json` in the theme directory, and a computer changes one with `choices-set.json` (applied once, then removed; null goes back to the theme) (default false) |
 
 In Launcher settings (hold OK on the gear, or Launcher settings in the remote's Settings panel), three rows switch
-`continue_watching_row`, `now_playing` and `show_settings_button` on the TV. Unlike upstream's choices there, a theme push keeps
-them: they are the owner's. With `WRITE_SETTINGS` granted as an app-op over ADB (`appops set com.gathin.tvhome WRITE_SETTINGS allow`), a row
+`continue_watching_row`, `now_playing` and `show_settings_button` on the TV. A theme push keeps them, and with `keep_tv_choices`
+upstream's choices there too: they are the owner's. With `WRITE_SETTINGS` granted as an app-op over ADB (`appops set com.gathin.tvhome WRITE_SETTINGS allow`), a row
 there sets when the TV's screensaver starts (`screen_off_timeout`: never, 5 to 60 minutes). Up from the continue-watching row reaches the top bar, and Down from the top bar the row.
 
 The Photos add-on (`addons/photo-screensaver`, `com.gathin.photodream`) also differs, in its card's slideshow: Left
