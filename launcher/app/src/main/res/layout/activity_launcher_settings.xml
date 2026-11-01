@@ -122,6 +122,20 @@
             style="@style/SettingsRow"
             android:layout_marginTop="10dp" />
 
+        <!-- Home's own parts, each shown when it can be switched: 繼續觀看 with continue_watching_days, the gear when
+             the remote has a Settings button to take its place. -->
+        <TextView
+            android:id="@+id/continueChoice"
+            style="@style/SettingsRow"
+            android:layout_marginTop="28dp"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/settingsButtonChoice"
+            style="@style/SettingsRow"
+            android:layout_marginTop="10dp"
+            android:visibility="gone" />
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

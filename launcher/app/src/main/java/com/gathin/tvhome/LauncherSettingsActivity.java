@@ -39,6 +39,10 @@ public final class LauncherSettingsActivity extends Activity {
     private TextView advancedChoice;
     private TextView followThemeChoice;
     private TextView openOnStartChoice;
+    private TextView continueChoice;
+    private TextView settingsButtonChoice;
+    private boolean continueRow;
+    private boolean settingsButton;
     private int columns;
     private int rowsBelowDock;
     private int dockOpacity;
@@ -147,6 +151,29 @@ public final class LauncherSettingsActivity extends Activity {
                         .show();
             }
         });
+        continueRow = config.continueWatchingRow;
+        continueChoice = findViewById(R.id.continueChoice);
+        if (config.continueWatchingDays > 0) {
+            continueChoice.setVisibility(View.VISIBLE);
+            continueChoice.setOnClickListener(v -> {
+                continueRow = !continueRow;
+                choices.edit().putBoolean(Config.CONTINUE_ROW_KEY, continueRow).apply();
+                changed();
+                refresh();
+            });
+        }
+        settingsButton = config.showSettingsButton;
+        settingsButtonChoice = findViewById(R.id.settingsButtonChoice);
+        if (config.settingsKeycodes.length > 0) {
+            settingsButtonChoice.setVisibility(View.VISIBLE);
+            settingsButtonChoice.setOnClickListener(v -> {
+                settingsButton = !settingsButton;
+                choices.edit().putBoolean(Config.SETTINGS_BUTTON_KEY, settingsButton).apply();
+                if (!settingsButton) Toast.makeText(this, R.string.settings_button_hidden, Toast.LENGTH_LONG).show();
+                changed();
+                refresh();
+            });
+        }
         openOnStartChoice = findViewById(R.id.openOnStartChoice);
         if (config.openOnStartChoice) {
             openOnStartChoice.setVisibility(View.VISIBLE);
@@ -157,8 +184,11 @@ public final class LauncherSettingsActivity extends Activity {
             if (!hasOnTvChoices()) return;
             choices.edit().remove("columns").remove(Config.ROWS_BELOW_DOCK_KEY).remove("animations")
                     .remove("advanced_effects").remove(Config.WALLPAPER_CHOICE_KEY)
-                    .remove(Config.DOCK_OPACITY_KEY).remove(Config.CLOCK_FORMAT_KEY).remove(OpenOnStart.KEY).commit();
+                    .remove(Config.DOCK_OPACITY_KEY).remove(Config.CLOCK_FORMAT_KEY).remove(OpenOnStart.KEY)
+                    .remove(Config.CONTINUE_ROW_KEY).remove(Config.SETTINGS_BUTTON_KEY).commit();
             Config current = Config.load(this);
+            continueRow = current.continueWatchingRow;
+            settingsButton = current.showSettingsButton;
             columns = current.columns;
             rowsBelowDock = current.rowsBelowDock;
             dockOpacity = current.dockOpacity;
@@ -317,6 +347,9 @@ public final class LauncherSettingsActivity extends Activity {
                         : wallpaperCurrent != null ? wallpaperCurrent
                         : getString(R.string.wallpaper_theme_default)));
         openOnStartChoice.setText(getString(R.string.open_on_start_state, openOnStartLabel()));
+        continueChoice.setText(getString(R.string.continue_row_state, getString(continueRow ? R.string.on : R.string.off)));
+        settingsButtonChoice.setText(getString(R.string.settings_button_state,
+                getString(settingsButton ? R.string.on : R.string.off)));
         followThemeChoice.setSelected(!hasOnTvChoices());
     }
 
@@ -324,7 +357,8 @@ public final class LauncherSettingsActivity extends Activity {
         return choices.contains("columns") || choices.contains(Config.ROWS_BELOW_DOCK_KEY)
                 || choices.contains("animations") || choices.contains("advanced_effects")
                 || choices.contains(Config.WALLPAPER_CHOICE_KEY) || choices.contains(Config.DOCK_OPACITY_KEY)
-                || choices.contains(Config.CLOCK_FORMAT_KEY) || choices.contains(OpenOnStart.KEY);
+                || choices.contains(Config.CLOCK_FORMAT_KEY) || choices.contains(OpenOnStart.KEY)
+                || choices.contains(Config.CONTINUE_ROW_KEY) || choices.contains(Config.SETTINGS_BUTTON_KEY);
     }
 
     private void open(Intent intent) {

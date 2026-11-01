@@ -101,4 +101,7 @@
     <string name="clock_format_system">系統</string>
     <string name="clock_format_12">12 小時制</string>
     <string name="clock_format_24">24 小時制</string>
+    <string name="continue_row_state">繼續觀看：%1$s</string>
+    <string name="settings_button_state">主畫面設定按鈕：%1$s</string>
+    <string name="settings_button_hidden">已隱藏。按遙控器的設定鍵即可回到這裡。</string>
 </resources>

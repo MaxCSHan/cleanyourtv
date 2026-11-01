@@ -834,6 +834,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             return true;
         });
         launcherSettingsButton = cfg.launcherSettingsButton;
+        if (!cfg.showSettingsButton) btnSettings.setVisibility(View.GONE);
         if (launcherSettingsButton) {
             ((TextView) btnSettings).setText(R.string.launcher_settings);
             ((TextView) btnSettings).setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_home_settings_pill, 0, 0, 0);
@@ -909,8 +910,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             if (event.getAction() != KeyEvent.ACTION_DOWN) return false;
             if (keyCode == KeyEvent.KEYCODE_DPAD_UP) return true;
             if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
-                // Back to the dock tile Up came from, not wherever the focus finder lands.
-                focusTile(singleRow ? lastFocused : lastFocused % COLUMNS);
+                // Back to the continue-watching row when it shows, else the dock tile Up came from, not wherever
+                // the focus finder lands.
+                if (!focusContinueRow(lastFocused % COLUMNS)) focusTile(singleRow ? lastFocused : lastFocused % COLUMNS);
                 return true;
             }
             int firstButton = btnInputs.getVisibility() == View.VISIBLE ? R.id.btnInputs : firstTopButton().getId();
@@ -2098,6 +2100,12 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             show.setOnKeyListener((v, keyCode, event) -> {
                 if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
                     if (event.getAction() == KeyEvent.ACTION_DOWN) focusTile(lastFocused);
+                    return true;
+                }
+                // Up: the top bar, as Up from the dock reaches it without the row (the focus finder found nothing
+                // above a pill, so the gear was out of reach).
+                if (keyCode == KeyEvent.KEYCODE_DPAD_UP) {
+                    if (event.getAction() == KeyEvent.ACTION_DOWN) firstTopButton().requestFocus();
                     return true;
                 }
                 // The row's two ends: focus stays rather than jumping to whatever lies beyond.

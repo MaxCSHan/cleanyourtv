@@ -40,6 +40,9 @@ final class Config {
     static final String FILE_NAME = "config.json";
     static final String WALLPAPER_NAME = "wallpaper.jpg";
     static final String SETTINGS_NAME = "launcher_settings";
+    /** Choices made on the TV for continue_watching_row and show_settings_button. A theme push keeps them: they are
+     *  the owner's, and the theme only sets where they start. */
+    static final String CONTINUE_ROW_KEY = "continue_watching_row", SETTINGS_BUTTON_KEY = "show_settings_button";
     static final String ROWS_BELOW_DOCK_KEY = "rows_below_dock";
     static final String WALLPAPER_CHOICE_KEY = "wallpaper_choice";
     static final String DOCK_OPACITY_KEY = "dock_opacity";
@@ -154,6 +157,8 @@ final class Config {
     final int dockBottomMargin;
     /** continue_row_gap: between the continue-watching row and what is under it (the title, else the dock), in dp. */
     final int continueRowGap;
+    /** show_settings_button: the gear at the top right; off leaves Settings to the remote's Settings button. */
+    final boolean showSettingsButton;
     /** App library as a round button in the top bar (config.xml library_button); needs app_library. */
     final boolean libraryButton;
     /** The App library pill after the last Home row; false hides it while libraryButton is on (show_library_pill). */
@@ -309,7 +314,8 @@ final class Config {
                    int openOnStartNetworkWait, boolean iconOnlyVpn, String clockFormat, boolean backOpensClock,
                    int wallpaperFadeMs, int continueWatchingDays, boolean continueWatchingRow,
                    boolean continueWatchingCovers, int dockTitleSize, boolean dockOnlyHome,
-                   boolean dockNameBelow, int dockUnfocusedOpacity, int dockBottomMargin, int continueRowGap) {
+                   boolean dockNameBelow, int dockUnfocusedOpacity, int dockBottomMargin, int continueRowGap,
+                   boolean showSettingsButton) {
         this.handleViewInputs = handleViewInputs;
         this.tileMenu = tileMenu;
         this.inputKeycodes = inputKeycodes;
@@ -370,6 +376,7 @@ final class Config {
         this.dockUnfocusedOpacity = dockUnfocusedOpacity;
         this.dockBottomMargin = dockBottomMargin;
         this.continueRowGap = continueRowGap;
+        this.showSettingsButton = showSettingsButton;
         this.libraryButton = libraryButton;
         this.showLibraryPill = showLibraryPill;
         this.wifiLabelWidth = wifiLabelWidth;
@@ -507,6 +514,7 @@ final class Config {
         int dockUnfocusedOpacity = res.getInteger(R.integer.dock_unfocused_opacity);
         int dockBottomMargin = res.getInteger(R.integer.dock_bottom_margin);
         int continueRowGap = res.getInteger(R.integer.continue_row_gap);
+        boolean showSettingsButton = res.getBoolean(R.bool.show_settings_button);
         boolean libraryButton = res.getBoolean(R.bool.library_button);
         boolean showLibraryPill = res.getBoolean(R.bool.show_library_pill);
         int wifiLabelWidth = res.getInteger(R.integer.wifi_label_width);
@@ -628,6 +636,7 @@ final class Config {
             dockUnfocusedOpacity = integer(json, "dock_unfocused_opacity", dockUnfocusedOpacity, 30, 100);
             dockBottomMargin = integer(json, "dock_bottom_margin", dockBottomMargin, 0, 120);
             continueRowGap = integer(json, "continue_row_gap", continueRowGap, 0, 60);
+            showSettingsButton = bool(json, "show_settings_button", showSettingsButton);
             libraryButton = bool(json, "library_button", libraryButton);
             showLibraryPill = bool(json, "show_library_pill", showLibraryPill);
             wifiLabelWidth = integer(json, "wifi_label_width", wifiLabelWidth, 0, 300);
@@ -714,6 +723,10 @@ final class Config {
         int dockOpacity = json == null ? 100 : integer(json, "dock_opacity", 100, 30, 100);
         dockOpacity = chosenDockOpacity(choices.getInt(DOCK_OPACITY_KEY, -1), dockOpacity);
         clockFormat = choices.getString(CLOCK_FORMAT_KEY, clockFormat);
+        continueWatchingRow = choices.getBoolean(CONTINUE_ROW_KEY, continueWatchingRow);
+        // Hidden only while the remote's Settings button can still reach these settings.
+        showSettingsButton = choices.getBoolean(SETTINGS_BUTTON_KEY, showSettingsButton)
+                || settingsKeycodes.length == 0;
         String wallpaperOrder = json == null ? WallpaperRotation.ORDER_SHUFFLE
                 : string(json, "wallpaper_order", WallpaperRotation.ORDER_SHUFFLE);
         // An unknown order must not silently change how an existing collection rotates.
@@ -757,7 +770,8 @@ final class Config {
                 Math.max(0, Math.min(3000, wallpaperFadeMs)), Math.max(0, Math.min(90, continueWatchingDays)),
                 continueWatchingRow, continueWatchingCovers, Math.max(24, Math.min(72, dockTitleSize)),
                 dockOnlyHome, dockNameBelow, Math.max(30, Math.min(100, dockUnfocusedOpacity)),
-                Math.max(0, Math.min(120, dockBottomMargin)), Math.max(0, Math.min(60, continueRowGap)));
+                Math.max(0, Math.min(120, dockBottomMargin)), Math.max(0, Math.min(60, continueRowGap)),
+                showSettingsButton);
     }
 
     /**

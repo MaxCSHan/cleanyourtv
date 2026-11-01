@@ -17,6 +17,11 @@ rebased on upstream regularly.
 | `dock_unfocused_opacity` | 30 to 100: the dock's other tiles at this opacity so the focused one stands out; the grid is not dimmed (default 100, off) |
 | `dock_bottom_margin` | 0 to 120: room under the dock row, in dp; less sits the dock lower over the wallpaper, the tiles keep their size (default 30, as upstream) |
 | `continue_row_gap` | 0 to 60: the gap under the continue-watching row, in dp; without `dock_title` it is measured from the dock instead of the hidden name's room (default 20) |
+| `show_settings_button` | false hides the gear at the top right; Settings is then the remote's Settings button (`settings_key_keycodes`, with `settings_key_panel` a panel that includes Launcher settings); without one the gear always shows (default true) |
+
+In Launcher settings (hold OK on the gear, or Launcher settings in the remote's Settings panel), two rows switch
+`continue_watching_row` and `show_settings_button` on the TV. Unlike upstream's choices there, a theme push keeps
+them: they are the owner's. Up from the continue-watching row reaches the top bar, and Down from the top bar the row.
 
 The Photos add-on (`addons/photo-screensaver`, `com.gathin.photodream`) also differs, in its card's slideshow: Left
 and Right step back and forth, OK switches the date taken on and off (the full date when the name carries the day),
