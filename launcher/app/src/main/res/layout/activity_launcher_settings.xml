@@ -122,6 +122,14 @@
             style="@style/SettingsRow"
             android:layout_marginTop="10dp" />
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/advanced_effects_warning"
+            android:textColor="#FFACB8C1"
+            android:textSize="14sp" />
+
         <!-- Home's own parts, each shown when it can be switched: 繼續觀看 with continue_watching_days, the gear when
              the remote has a Settings button to take its place. -->
         <TextView
@@ -135,14 +143,6 @@
             style="@style/SettingsRow"
             android:layout_marginTop="10dp"
             android:visibility="gone" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/advanced_effects_warning"
-            android:textColor="#FFACB8C1"
-            android:textSize="14sp" />
 
         <TextView
             android:id="@+id/openOnStartChoice"
