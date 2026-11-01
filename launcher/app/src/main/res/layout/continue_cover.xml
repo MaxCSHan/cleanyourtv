@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One show in the continue_watching_row with continue_watching_covers: its cover (or the app's icon) over its text.
+     White when focused, like the top bar's pills. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="232dp"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="10dp"
+    android:layout_marginEnd="6dp"
+    android:padding="3dp"
+    android:orientation="vertical"
+    android:background="@drawable/cover_bg"
+    android:focusable="true"
+    android:clickable="true">
+
+    <ImageView
+        android:id="@+id/coverArt"
+        android:layout_width="match_parent"
+        android:layout_height="127dp"
+        android:scaleType="centerCrop"
+        android:background="@drawable/cover_art_bg"
+        android:importantForAccessibility="no" />
+
+    <TextView
+        android:id="@+id/coverText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="7dp"
+        android:paddingEnd="7dp"
+        android:paddingTop="6dp"
+        android:paddingBottom="5dp"
+        android:duplicateParentState="true"
+        android:maxLines="2"
+        android:ellipsize="end"
+        android:textColor="@drawable/pill_text"
+        android:textSize="13sp"
+        android:fontFamily="@string/font_medium" />
+</LinearLayout>

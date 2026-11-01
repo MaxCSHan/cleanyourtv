@@ -374,9 +374,17 @@
     <!-- With continue_watching_days on: the newest unfinished shows from every app (up to 5, within those days) as a
          row of pills above the shelf, each with its app's icon. Up from the dock reaches it, Down goes back, and OK
          resumes the show through the link its app wrote, opening the app normally when there is none; OK on a dock
-         app still opens the app as usual. Hidden when nothing is unfinished. Can also be set with
-         "continue_watching_row". -->
+         app still opens the app as usual. Hidden when nothing is unfinished. The line under the app's name is left
+         out while the row is on: it would repeat the same show. Can also be set with "continue_watching_row". -->
     <bool name="continue_watching_row">false</bool>
+    <!-- With continue_watching_row on: each show as a card with its cover instead of a pill. Home has no network, so
+         the covers come from a separate covers app (package mm.tv.covers, with READ_TV_LISTINGS) that fetches only
+         the rows' own posters; without it, or before a cover is fetched, the card shows the app's icon. Can also be
+         set with "continue_watching_covers". -->
+    <bool name="continue_watching_covers">false</bool>
+    <!-- The dock app's name above the dock, in sp, 24 to 72; 48 by default. Smaller leaves more of the wallpaper
+         in view. Can also be set with "dock_title_size". -->
+    <integer name="dock_title_size">48</integer>
     <!-- Rotating wallpapers: show each picture's name under the top-right buttons, from a captions.txt next to the
          pictures in wallpapers/ ("01-dusk.jpg<TAB>Dusk over the peaks", one per line). A picture without a line
          shows no name. Can also be set with "wallpaper_captions": true in a theme's config.json. -->

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The cover's rounded clip (clipToOutline, set in code) and the backdrop behind an app icon without a cover. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="#33FFFFFF" />
+    <corners android:radius="11dp" />
+</shape>

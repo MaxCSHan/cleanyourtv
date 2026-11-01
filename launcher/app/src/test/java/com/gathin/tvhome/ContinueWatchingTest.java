@@ -27,4 +27,10 @@ public class ContinueWatchingTest {
         assertEquals(0, ContinueWatching.minutesLeft(5_000L, 0L));
         assertEquals(0, ContinueWatching.minutesLeft(5_000L, 5_000L));
     }
+
+    @Test
+    public void coverNamesAreTheCoversAppsSha1() throws Exception {
+        // The covers app (mm.tv.covers) stores each poster under this name; both sides must agree.
+        assertEquals("a9993e364706816aba3e25717850c26c9cd0d89d", ContinueWatching.sha1("abc"));
+    }
 }

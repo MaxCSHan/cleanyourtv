@@ -154,6 +154,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private ContinueWatching continueWatching;
     /** continue_watching_row: the shows above the shelf, or null when off. */
     private LinearLayout continueRow, continueShows;
+    /** continue_watching_covers: the row's shows as cover cards instead of pills. */
+    private boolean continueCovers;
     private LinearLayout heroDots;
     /** Cinematic top shelf (config.xml, cinematic_home): the focused dock app's artwork behind a larger shelf. */
     private boolean cinematic;
@@ -514,8 +516,15 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         cinematicWhiteFocus = cfg.cinematicWhiteFocus;
         heroArtAlpha = cfg.cinematicArt / 100f;
         if (cinematic) setUpCinematicShelf(cfg.cinematicScrim);
-        if (!cinematic && cfg.dockTitle && cfg.continueWatchingDays > 0) {
-            continueWatching = new ContinueWatching(this, cfg.continueWatchingDays);
+        if (cfg.dockTitleSize != 48) heroName.setTextSize(TypedValue.COMPLEX_UNIT_SP, cfg.dockTitleSize);
+        if (!cinematic && cfg.dockTitle && cfg.continueWatchingDays > 0 && cfg.continueWatchingRow) {
+            // The row shows the same shows, so the line under the name stays out and its room goes to the wallpaper.
+            continueCovers = cfg.continueWatchingCovers;
+            continueWatching = new ContinueWatching(this, cfg.continueWatchingDays, continueCovers);
+            continueRow = findViewById(R.id.continueRow);
+            continueShows = findViewById(R.id.continueShows);
+        } else if (!cinematic && cfg.dockTitle && cfg.continueWatchingDays > 0) {
+            continueWatching = new ContinueWatching(this, cfg.continueWatchingDays, false);
             heroMeta.setVisibility(View.INVISIBLE);   // keeps its height, so the name does not jump when it fills in
             // A soft dark halo, readable on a bright photo. The padding (taken back from the margins) leaves the blur
             // room inside the view: a shadow cut off at the view's edge shows as a hard-edged box.
@@ -526,10 +535,6 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             lp.setMarginStart(lp.getMarginStart() - halo);
             lp.topMargin -= halo;
             heroMeta.setLayoutParams(lp);
-            if (cfg.continueWatchingRow) {
-                continueRow = findViewById(R.id.continueRow);
-                continueShows = findViewById(R.id.continueShows);
-            }
         }
         // dock_title false: the name above the dock (and the cinematic lines under it) never shows; the glow
         // still follows the dock.
@@ -1104,8 +1109,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         updatePanel();
         if (continueWatching != null) {
             continueWatching.refresh(() -> {
-                if (heroShown && lastFocused < adapter.appCount()) updateContinueLine(lastFocused);
                 if (continueRow != null) fillContinueRow();
+                else if (heroShown && lastFocused < adapter.appCount()) updateContinueLine(lastFocused);
             });
         }
         // The network and Inputs pills keep their state while Home is in the background, and callbacks update them
@@ -1951,7 +1956,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private void fillHero(int position, String label) {
         heroName.setText(label);
         if (!cinematic) {
-            if (continueWatching != null) updateContinueLine(position);
+            if (continueWatching != null && continueRow == null) updateContinueLine(position);
             return;
         }
         updateHeroMeta(position);
@@ -2048,17 +2053,33 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         PackageManager pm = getPackageManager();
         int icon = Math.round(24 * density);
         for (ContinueWatching.Item item : continueWatching.items()) {
-            TextView show = (TextView) getLayoutInflater().inflate(R.layout.continue_show, continueShows, false);
-            show.setText(item.text);
-            show.setTag(item.pkg);
+            Drawable appIcon;
             try {
-                Drawable d = pm.getApplicationIcon(item.pkg);
-                d.setBounds(0, 0, icon, icon);
-                show.setCompoundDrawables(d, null, null, null);
-                show.setCompoundDrawableTintList(null);   // the pill style tints its icons; an app icon keeps its colours
+                appIcon = pm.getApplicationIcon(item.pkg);
             } catch (PackageManager.NameNotFoundException e) {
                 continue;   // the app is gone
             }
+            View show;
+            if (continueCovers) {
+                show = getLayoutInflater().inflate(R.layout.continue_cover, continueShows, false);
+                ImageView art = show.findViewById(R.id.coverArt);
+                art.setClipToOutline(true);
+                if (item.cover != null) {
+                    art.setImageBitmap(item.cover);
+                } else {
+                    art.setScaleType(ImageView.ScaleType.CENTER_INSIDE);   // no cover (yet): the app's icon
+                    art.setImageDrawable(appIcon);
+                }
+                ((TextView) show.findViewById(R.id.coverText)).setText(item.text);
+            } else {
+                TextView pill = (TextView) getLayoutInflater().inflate(R.layout.continue_show, continueShows, false);
+                pill.setText(item.text);
+                appIcon.setBounds(0, 0, icon, icon);
+                pill.setCompoundDrawables(appIcon, null, null, null);
+                pill.setCompoundDrawableTintList(null);   // the pill style tints its icons; an app icon keeps its colours
+                show = pill;
+            }
+            show.setTag(item.pkg);
             show.setOnClickListener(v -> resume(item));
             show.setOnKeyListener((v, keyCode, event) -> {
                 if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {

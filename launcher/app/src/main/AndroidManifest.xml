@@ -70,6 +70,8 @@
         <!-- Coocaa OS sources for the Inputs menu (coocaa_sources); see CoocaaSources. -->
         <provider android:authorities="com.skyworth.tv.provider" />
         <provider android:authorities="com.skyworth.tv.sdk.provider" />
+        <!-- continue_watching_covers: the covers app that fetches the rows' posters, so Home stays offline. -->
+        <provider android:authorities="mm.tv.covers" />
     </queries>
 
     <application

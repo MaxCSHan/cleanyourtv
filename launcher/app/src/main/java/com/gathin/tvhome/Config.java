@@ -140,6 +140,10 @@ final class Config {
     final int continueWatchingDays;
     /** continue_watching_row: the newest unfinished shows from every app as a row above the shelf; needs the days. */
     final boolean continueWatchingRow;
+    /** continue_watching_covers: the row's shows as cover cards, from the covers app (mm.tv.covers). */
+    final boolean continueWatchingCovers;
+    /** dock_title_size: the dock app's name above the dock, in sp. */
+    final int dockTitleSize;
     /** App library as a round button in the top bar (config.xml library_button); needs app_library. */
     final boolean libraryButton;
     /** The App library pill after the last Home row; false hides it while libraryButton is on (show_library_pill). */
@@ -293,7 +297,8 @@ final class Config {
                    boolean handleViewInputs, boolean tileMenu, boolean dockEvenPadding, boolean dockBand, boolean cinematicDots, boolean cinematicWhiteFocus, boolean wifiStatusColor, int cinematicScrim, int cinematicArt,
                    Map<String, Set<String>> wallpaperMoods, boolean gamepadPassthrough, boolean consumeVolumeKeys, boolean powerOnHome, boolean homeLongPressHome, boolean wifiStatusWarnings, List<String> topBarApps, boolean showGreeting, boolean headerWhite, boolean clockWallpaper, int clockWallpaperDim, boolean clockGlow, String glassStyle, boolean singleRow, boolean dockBandAll, boolean lunarDate, int lunarUtcOffset, boolean dateBelowClock, boolean vpnPill, String locale, boolean powerOnHomeAlways, boolean inputsConnectedOnly,
                    int openOnStartNetworkWait, boolean iconOnlyVpn, String clockFormat, boolean backOpensClock,
-                   int wallpaperFadeMs, int continueWatchingDays, boolean continueWatchingRow) {
+                   int wallpaperFadeMs, int continueWatchingDays, boolean continueWatchingRow,
+                   boolean continueWatchingCovers, int dockTitleSize) {
         this.handleViewInputs = handleViewInputs;
         this.tileMenu = tileMenu;
         this.inputKeycodes = inputKeycodes;
@@ -347,6 +352,8 @@ final class Config {
         this.wallpaperFadeMs = wallpaperFadeMs;
         this.continueWatchingDays = continueWatchingDays;
         this.continueWatchingRow = continueWatchingRow;
+        this.continueWatchingCovers = continueWatchingCovers;
+        this.dockTitleSize = dockTitleSize;
         this.libraryButton = libraryButton;
         this.showLibraryPill = showLibraryPill;
         this.wifiLabelWidth = wifiLabelWidth;
@@ -477,6 +484,8 @@ final class Config {
         int wallpaperFadeMs = res.getInteger(R.integer.wallpaper_fade_ms);
         int continueWatchingDays = res.getInteger(R.integer.continue_watching_days);
         boolean continueWatchingRow = res.getBoolean(R.bool.continue_watching_row);
+        boolean continueWatchingCovers = res.getBoolean(R.bool.continue_watching_covers);
+        int dockTitleSize = res.getInteger(R.integer.dock_title_size);
         boolean libraryButton = res.getBoolean(R.bool.library_button);
         boolean showLibraryPill = res.getBoolean(R.bool.show_library_pill);
         int wifiLabelWidth = res.getInteger(R.integer.wifi_label_width);
@@ -591,6 +600,8 @@ final class Config {
             wallpaperFadeMs = integer(json, "wallpaper_fade_ms", wallpaperFadeMs, 0, 3000);
             continueWatchingDays = integer(json, "continue_watching_days", continueWatchingDays, 0, 90);
             continueWatchingRow = bool(json, "continue_watching_row", continueWatchingRow);
+            continueWatchingCovers = bool(json, "continue_watching_covers", continueWatchingCovers);
+            dockTitleSize = integer(json, "dock_title_size", dockTitleSize, 24, 72);
             libraryButton = bool(json, "library_button", libraryButton);
             showLibraryPill = bool(json, "show_library_pill", showLibraryPill);
             wifiLabelWidth = integer(json, "wifi_label_width", wifiLabelWidth, 0, 300);
@@ -718,7 +729,7 @@ final class Config {
                 dateBelowClock, vpnPill, locale, powerOnHomeAlways, inputsConnectedOnly,
                 Math.max(0, Math.min(600, openOnStartNetworkWait)), iconOnlyVpn, clockFormat, backOpensClock,
                 Math.max(0, Math.min(3000, wallpaperFadeMs)), Math.max(0, Math.min(90, continueWatchingDays)),
-                continueWatchingRow);
+                continueWatchingRow, continueWatchingCovers, Math.max(24, Math.min(72, dockTitleSize)));
     }
 
     /**
