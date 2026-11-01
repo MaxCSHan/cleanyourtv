@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- settings_panel: Launcher settings as a panel on the right over Home, as the TV's own settings are. Home stays in
+     view at the left and redraws as a value changes. Rows are built in SettingsPanelActivity. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scrim"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/settings_scrim">
+
+    <LinearLayout
+        android:id="@+id/panel"
+        android:layout_width="440dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="end"
+        android:orientation="vertical"
+        android:background="@drawable/settings_panel_bg"
+        android:elevation="16dp"
+        android:paddingStart="28dp"
+        android:paddingTop="52dp"
+        android:paddingEnd="28dp">
+
+        <TextView
+            android:id="@+id/crumb"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:singleLine="true"
+            android:textAllCaps="true"
+            android:textColor="#80FFFFFF"
+            android:textSize="12sp"
+            android:letterSpacing="0.18"
+            android:fontFamily="@string/font_medium" />
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="4dp"
+            android:singleLine="true"
+            android:textColor="#FFFFFFFF"
+            android:textSize="30sp"
+            android:fontFamily="@string/font_light" />
+
+        <ScrollView
+            android:id="@+id/scroll"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginTop="22dp"
+            android:clipToPadding="false"
+            android:paddingBottom="40dp"
+            android:scrollbars="none"
+            android:fadingEdgeLength="32dp"
+            android:requiresFadingEdge="vertical">
+
+            <LinearLayout
+                android:id="@+id/rows"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+        </ScrollView>
+    </LinearLayout>
+</FrameLayout>

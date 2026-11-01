@@ -163,6 +163,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private boolean dockTitle;
     /** The dock's band, whose left edge the continue-watching row lines up with. */
     private DockDecoration dockDecoration;
+    private boolean settingsPanel;
     /** now_playing: the song playing, first in the continue-watching row; null when off. */
     private NowPlaying nowPlaying;
     /** continue_watching_row: the shows are in the row (else it may hold only what plays). */
@@ -531,6 +532,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         if (cinematic) setUpCinematicShelf(cfg.cinematicScrim);
         dockOnlyHome = cfg.dockOnlyHome;
         dockTitle = cfg.dockTitle;
+        settingsPanel = cfg.settingsPanel;
+        if (settingsPanel) getSharedPreferences(Config.SETTINGS_NAME, MODE_PRIVATE)
+                .registerOnSharedPreferenceChangeListener(livePreview);
         continueRowGap = cfg.continueRowGap;
         if (cfg.dockTitleSize != 48) heroName.setTextSize(TypedValue.COMPLEX_UNIT_SP, cfg.dockTitleSize);
         // The row sits above the dock with or without the name over it (dock_title).
@@ -854,7 +858,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         }
         btnSettings.setOnClickListener(v -> {
             if (launcherSettingsButton) startActivityForResult(
-                    new Intent(this, LauncherSettingsActivity.class), LAUNCHER_SETTINGS_REQUEST);
+                    settingsIntent(), LAUNCHER_SETTINGS_REQUEST);
             else open(systemIntent(Settings.ACTION_SETTINGS));
         });
         btnReorder = findViewById(R.id.btnReorder);
@@ -1055,7 +1059,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private boolean openLauncherSettingsIfAsked(Intent intent) {
         if (intent == null || !ACTION_LAUNCHER_SETTINGS.equals(intent.getAction())) return false;
         setIntent(new Intent(Intent.ACTION_MAIN));
-        startActivityForResult(new Intent(this, LauncherSettingsActivity.class), LAUNCHER_SETTINGS_REQUEST);
+        startActivityForResult(settingsIntent(), LAUNCHER_SETTINGS_REQUEST);
         return true;
     }
 
@@ -1165,6 +1169,20 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             }
         }
     }
+
+    /** Launcher settings: the panel over Home with settings_panel, else upstream's full screen. */
+    private Intent settingsIntent() {
+        return new Intent(this, settingsPanel ? SettingsPanelActivity.class : LauncherSettingsActivity.class);
+    }
+
+    /**
+     * settings_panel: a change made in the panel rebuilds Home at once, behind it, so it shows while the panel is
+     * open. Only while Home is not in front (the panel covers it); in front, onResume compares the count as before.
+     */
+    private final SharedPreferences.OnSharedPreferenceChangeListener livePreview = (prefs, key) -> {
+        if (Config.SETTINGS_REVISION_KEY.equals(key) && !resumed
+                && Config.settingsChanged(settingsRevision, settingsRevision())) recreate();
+    };
 
     /** Launcher settings' change count (Config.SETTINGS_REVISION_KEY); onResume rebuilds Home when it moved. */
     private long settingsRevision() {
@@ -1397,6 +1415,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         super.onDestroy();
         RemoteKeys.release(this);
         cancelHoldOk();
+        getSharedPreferences(Config.SETTINGS_NAME, MODE_PRIVATE).unregisterOnSharedPreferenceChangeListener(livePreview);
         if (gameDay != null) gameDay.shutdown();
         unregisterReceiver(packageReceiver);
         wallpaperPlayer.close();
@@ -3891,7 +3910,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         addInputRow(rows, popup, R.drawable.ic_swap_vert, getString(R.string.reorder), -1, this::toggleReorder);
         if (launcherSettingsButton) {
             addInputRow(rows, popup, R.drawable.ic_home_settings_pill, getString(R.string.launcher_settings), -1,
-                    () -> startActivityForResult(new Intent(this, LauncherSettingsActivity.class), LAUNCHER_SETTINGS_REQUEST));
+                    () -> startActivityForResult(settingsIntent(), LAUNCHER_SETTINGS_REQUEST));
         } else {
             addInputRow(rows, popup, R.drawable.ic_settings, getString(R.string.settings), -1,
                     () -> open(systemIntent(Settings.ACTION_SETTINGS)));
@@ -3909,7 +3928,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         LinearLayout rows = panel.findViewById(R.id.rows);
         PopupWindow popup = glassPopup(panel, (int) (200 * density));
         if (!launcherSettingsButton) addSettingsMenuRow(rows, popup, R.string.launcher_settings, () -> startActivityForResult(
-                new Intent(this, LauncherSettingsActivity.class), LAUNCHER_SETTINGS_REQUEST));
+                settingsIntent(), LAUNCHER_SETTINGS_REQUEST));
         // Firmware that ships its own settings app next to the AOSP one (Xiaomi China is one): the
         // vendor app holds pages the AOSP settings has no row for, such as Account & Security with
         // the ADB switch. Offered here only while one of them is installed.

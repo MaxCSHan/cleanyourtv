@@ -21,6 +21,7 @@ rebased on upstream regularly.
 | `now_playing` | what plays while Home shows (Spotify and the like) as the continue-watching row's first pill, alone there (titled Now playing) when `continue_watching_row` is off, with the song, the artist and the cover the app hands over; OK opens its player. Read from the TV's media sessions, offline; needs notification-listener access for `NowPlayingListener`, granted over ADB (default false) |
 | `home_dates` | today's date under the clock clearer (16sp, brighter), and a wallpaper's caption from `captions.txt` (a date taken) on the same line at the right, same font, softer, after a photo mark (default false) |
 | `keep_tv_choices` | what the owner picks in Launcher settings stays theirs: a theme push no longer clears it. The choices are written to `choices.json` in the theme directory, and a computer changes one with `choices-set.json` (applied once, then removed; null goes back to the theme) (default false) |
+| `settings_panel` | Launcher settings as a panel on the right over Home, like the TV's own settings: categories (Home, Dock, Wallpaper and photos, Screensaver, Effects, System) with their values, switches, choices on their own page with a tick, Back one level up; Home redraws behind it as a value changes (default false) |
 
 In Launcher settings (hold OK on the gear, or Launcher settings in the remote's Settings panel), three rows switch
 `continue_watching_row`, `now_playing` and `show_settings_button` on the TV. A theme push keeps them, and with `keep_tv_choices`

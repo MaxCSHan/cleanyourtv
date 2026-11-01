@@ -186,4 +186,18 @@
     <string name="dock_margin_low">Low</string>
     <string name="dock_margin_standard">Standard</string>
     <string name="dock_margin_high">High</string>
+    <string name="panel_home">Home</string>
+    <string name="panel_columns_value">%1$d per row</string>
+    <string name="panel_dock">Dock</string>
+    <string name="panel_wallpaper">Wallpaper and photos</string>
+    <string name="panel_screensaver">Screensaver</string>
+    <string name="panel_effects">Effects</string>
+    <string name="panel_animations">Animations</string>
+    <string name="panel_system">System</string>
+    <string name="panel_system_summary">TV settings · Default Home</string>
+    <string name="panel_clock">Clock</string>
+    <string name="panel_settings_button">Settings button on Home</string>
+    <string name="panel_settings_button_summary">Hidden, the remote\'s Settings button opens these settings</string>
+    <string name="panel_photos_count">%1$d photos</string>
+    <string name="panel_spotlight">Spotlight</string>
 </resources>

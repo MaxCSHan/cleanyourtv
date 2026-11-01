@@ -146,6 +146,11 @@
             android:excludeFromRecents="true"
             android:noHistory="true"
             android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" />
+        <!-- settings_panel: Launcher settings as a panel over Home (translucent, so Home shows and redraws behind). -->
+        <activity
+            android:name=".SettingsPanelActivity"
+            android:exported="false"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" />
         <activity
             android:name=".HomeSettingsActivity"
             android:exported="false"
