@@ -365,6 +365,12 @@
          0 to 3000. 0 (the default) keeps the cut. The old and new pictures are both in memory while it runs. Off
          with reduced motion. Can also be set with "wallpaper_fade_ms". -->
     <integer name="wallpaper_fade_ms">0</integer>
+    <!-- Under the focused dock app's name, the show it left unfinished: "Continue: Show · S2 E18 · 47 min left",
+         from the TV's Watch Next rows that apps such as Netflix write. Rows older than this many days are left out,
+         1 to 90; 0 (the default) is off. Text only, no artwork. Needs READ_TV_LISTINGS granted over ADB
+         (adb shell pm grant com.gathin.tvhome android.permission.READ_TV_LISTINGS); without it nothing shows.
+         Not on the cinematic shelf. Can also be set with "continue_watching_days". -->
+    <integer name="continue_watching_days">0</integer>
     <!-- Rotating wallpapers: show each picture's name under the top-right buttons, from a captions.txt next to the
          pictures in wallpapers/ ("01-dusk.jpg<TAB>Dusk over the peaks", one per line). A picture without a line
          shows no name. Can also be set with "wallpaper_captions": true in a theme's config.json. -->

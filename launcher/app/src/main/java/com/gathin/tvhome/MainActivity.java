@@ -150,6 +150,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     /** The top shelf: heroName, plus the cinematic shelf's "Last opened" line and dock position dots. */
     private View hero;
     private TextView heroMeta;
+    /** continue_watching_days: the unfinished show under the shelf's name, or null when off. */
+    private ContinueWatching continueWatching;
     private LinearLayout heroDots;
     /** Cinematic top shelf (config.xml, cinematic_home): the focused dock app's artwork behind a larger shelf. */
     private boolean cinematic;
@@ -510,6 +512,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         cinematicWhiteFocus = cfg.cinematicWhiteFocus;
         heroArtAlpha = cfg.cinematicArt / 100f;
         if (cinematic) setUpCinematicShelf(cfg.cinematicScrim);
+        if (!cinematic && cfg.dockTitle && cfg.continueWatchingDays > 0) {
+            continueWatching = new ContinueWatching(this, cfg.continueWatchingDays);
+            heroMeta.setVisibility(View.INVISIBLE);   // keeps its height, so the name does not jump when it fills in
+        }
         // dock_title false: the name above the dock (and the cinematic lines under it) never shows; the glow
         // still follows the dock.
         if (!cfg.dockTitle) hero.setVisibility(View.GONE);
@@ -1081,6 +1087,11 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         if (openLiveTvAfterBoot()) return;
         updateGreeting();
         updatePanel();
+        if (continueWatching != null) {
+            continueWatching.refresh(() -> {
+                if (heroShown && lastFocused < adapter.appCount()) updateContinueLine(lastFocused);
+            });
+        }
         // The network and Inputs pills keep their state while Home is in the background, and callbacks update them
         // when the network or the inputs change, so this refresh only catches anything missed. Its binder calls
         // (about 7 ms on a TCL C755, most of it WifiManager.getConnectionInfo) would hold up the first frame back
@@ -1922,7 +1933,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     /** The shelf's text for this dock app: its name and, on the cinematic shelf, "Last opened" and the dots. */
     private void fillHero(int position, String label) {
         heroName.setText(label);
-        if (!cinematic) return;
+        if (!cinematic) {
+            if (continueWatching != null) updateContinueLine(position);
+            return;
+        }
         updateHeroMeta(position);
         updateHeroDots(position);
     }
@@ -2002,6 +2016,13 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private void fadeHeroArt(int ms) {
         if (!animations) heroArt.setAlpha(heroArtAlpha);
         else heroArt.animate().alpha(heroArtAlpha).setDuration(reducedMotion ? Math.min(ms, Motion.REDUCED_MS) : ms).start();
+    }
+
+    /** continue_watching_days: the app's unfinished show, or nothing (but the same height). */
+    private void updateContinueLine(int position) {
+        String line = continueWatching.lineFor(adapter.packageAt(position));
+        heroMeta.setText(line);
+        heroMeta.setVisibility(line == null ? View.INVISIBLE : View.VISIBLE);
     }
 
     /** "Last opened yesterday, 9:40 PM", the time in white; nothing (but the same height) when it was never seen. */
