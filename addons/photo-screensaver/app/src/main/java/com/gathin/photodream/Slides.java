@@ -33,19 +33,24 @@ import java.util.concurrent.Executors;
  * Full-screen mode: loops through the pictures sync.sh put in the app's pictures/ folder, in filename order,
  * each slowly zooming and drifting (Ken Burns) and crossfading into the next after seconds.txt (20 s by
  * default). Two screen-sized pictures at most, held as GPU bitmaps. MP4 clips play once, muted and cropped to
- * fill the screen, on the hardware decoder (one player at a time), then the loop moves on.
+ * fill the screen, on the hardware decoder (one player at a time), then the loop moves on. In the card's slideshow
+ * Left and Right step back and forth (a quicker fade), and the date can be switched on and off while it runs.
  */
 final class Slides {
 
     private static final long FADE_MS = 1500L;
+    /** A step by hand: quick enough to browse, still a fade. */
+    private static final long STEP_FADE_MS = 400L;
     /** How far a picture zooms in over its time on screen; it drifts at most half the extra width. */
     private static final float ZOOM = 1.12f;
 
     private final Context context;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final Random random = new Random();
-    /** The month and year of the picture on screen, or null when the option is off. */
+    /** When the picture on screen was taken; shown while dates is on. */
     private final TextView caption;
+    private boolean dates;
+    private String shownDate = "";
     private final View empty;
     private ExecutorService decoder;
     private ImageView front;
@@ -66,9 +71,10 @@ final class Slides {
 
     private final Runnable advance = this::showNext;
 
-    Slides(Context context, FrameLayout stage, TextView caption, View empty) {
+    Slides(Context context, FrameLayout stage, TextView caption, boolean dates, int seconds, View empty) {
         this.context = context;
         this.caption = caption;
+        this.dates = dates;
         this.empty = empty;
         video = new TextureView(context);
         video.setAlpha(0f);
@@ -97,9 +103,10 @@ final class Slides {
         height = metrics.heightPixels;
         preferences = context.getSharedPreferences("photo_dream", Context.MODE_PRIVATE);
         File dir = context.getExternalFilesDir(null);
-        interval = Media.seconds(Photos.read(dir == null ? null : new File(dir, Media.SECONDS))) * 1000L;
+        interval = (seconds > 0 ? seconds
+                : Media.seconds(Photos.read(dir == null ? null : new File(dir, Media.SECONDS)))) * 1000L;
         images = dir == null ? new ArrayList<>() : Media.list(new File(dir, Media.PICTURES));
-        if (caption != null) caption.setAlpha(0f);
+        caption.setAlpha(0f);
     }
 
     private ImageView image(FrameLayout stage) {
@@ -129,8 +136,24 @@ final class Slides {
         stopVideo();
     }
 
-    /** Decodes the next picture off the main thread, then fades it in over the current one. */
     private void showNext() {
+        show(1, FADE_MS);
+    }
+
+    /** Left and Right: the picture before or after this one, at once; the loop goes on from there. */
+    void step(int by) {
+        handler.removeCallbacks(advance);
+        show(by, STEP_FADE_MS);
+    }
+
+    /** Dates on or off while the slideshow runs. */
+    void showDates(boolean on) {
+        dates = on;
+        showCaption(shownDate, FADE_MS / 2);
+    }
+
+    /** Decodes the picture {@code by} places on off the main thread, then fades it in over the current one. */
+    private void show(int by, long fadeMs) {
         if (!running || images.isEmpty() || decoder == null) return;
         decoder.execute(() -> {
             Bitmap bitmap = null;
@@ -138,31 +161,34 @@ final class Slides {
             String date = "";
             // Skip unreadable pictures, but stop after one round so a folder of broken files doesn't spin.
             for (int tries = 0; tries < images.size() && bitmap == null && clip == null; tries++) {
-                File file = Media.next(images, preferences.getString("image", ""));
+                File file = Media.step(images, preferences.getString("image", ""), by);
                 preferences.edit().putString("image", file.getName()).apply();
                 if (Media.video(file.getName())) {
                     clip = file;
                 } else {
                     bitmap = decode(file);
-                    if (bitmap != null && caption != null) date = Photos.dateOf(file);
+                    if (bitmap != null) date = Photos.dateOf(file);
                 }
             }
             Bitmap shown = bitmap;
             File playing = clip;
-            String shownDate = date;
+            String taken = date;
             handler.post(() -> {
                 if (!running) {
                     if (shown != null) shown.recycle();
                     return;
                 }
+                handler.removeCallbacks(advance);   // a step meanwhile must not leave two loops running
                 if (playing != null) {
-                    showCaption("");
+                    shownDate = "";
+                    showCaption("", fadeMs / 2);
                     playVideo(playing);   // moves on when the clip ends
                     return;
                 }
                 if (shown != null) {
-                    crossfade(shown);
-                    showCaption(shownDate);
+                    crossfade(shown, fadeMs);
+                    shownDate = taken;
+                    showCaption(taken, fadeMs / 2);
                 }
                 // A single picture still drifts on: it fades into itself with a new zoom.
                 handler.postDelayed(advance, interval);
@@ -170,20 +196,19 @@ final class Slides {
         });
     }
 
-    private void showCaption(String date) {
-        if (caption == null) return;
+    private void showCaption(String date, long half) {
         caption.animate().cancel();
-        if (date.isEmpty()) {
-            caption.animate().alpha(0f).setDuration(FADE_MS / 2).start();
+        if (date.isEmpty() || !dates) {
+            caption.animate().alpha(0f).setDuration(half).start();
             return;
         }
-        caption.animate().alpha(0f).setDuration(FADE_MS / 2).withEndAction(() -> {
+        caption.animate().alpha(0f).setDuration(half).withEndAction(() -> {
             caption.setText(date);
-            caption.animate().alpha(1f).setDuration(FADE_MS / 2).start();
+            caption.animate().alpha(1f).setDuration(half).start();
         }).start();
     }
 
-    private void crossfade(Bitmap bitmap) {
+    private void crossfade(Bitmap bitmap, long fadeMs) {
         ImageView incoming = back;
         ImageView outgoing = front;
         back = outgoing;
@@ -200,7 +225,7 @@ final class Slides {
         float dx = (random.nextFloat() - 0.5f) * width * (ZOOM - 1f);
         float dy = (random.nextFloat() - 0.5f) * height * (ZOOM - 1f);
         incoming.setAlpha(0f);
-        ObjectAnimator fade = ObjectAnimator.ofFloat(incoming, View.ALPHA, 0f, 1f).setDuration(FADE_MS);
+        ObjectAnimator fade = ObjectAnimator.ofFloat(incoming, View.ALPHA, 0f, 1f).setDuration(fadeMs);
         ObjectAnimator drift = ObjectAnimator.ofPropertyValuesHolder(incoming,
                 PropertyValuesHolder.ofFloat(View.SCALE_X, from, to),
                 PropertyValuesHolder.ofFloat(View.SCALE_Y, from, to),
@@ -214,11 +239,12 @@ final class Slides {
         set.start();
         boolean afterClip = player != null;
         handler.postDelayed(() -> {
+            if (outgoing == front) return;   // stepped on quickly: this view holds a newer picture now
             cancel(outgoing);
             outgoing.setAlpha(0f);
             release(outgoing);
             if (afterClip) stopVideo();
-        }, FADE_MS + 100);
+        }, fadeMs + 100);
     }
 
     /** Fades the clip in over whatever shows now and plays it to the end (or loops a lone clip). */

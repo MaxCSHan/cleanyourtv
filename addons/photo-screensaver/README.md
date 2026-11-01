@@ -13,12 +13,14 @@ holding OK (or Menu) opens the settings, Back leaves.
 
 All off by default, which is the plain full-screen slideshow above. Switch them on in the screensaver's own
 settings (TV settings > screensaver > Photos > settings), or by holding OK (or pressing Menu) in the card's
-slideshow. Google TV has no settings entry for other screensavers, so there it is the slideshow only:
+slideshow. In the card's slideshow Left and Right also step back and forth, and OK switches the date taken on
+and off; which keys do what shows for a few seconds on the first start and on Up or Down. The settings also set
+the seconds per picture, which then win over `sync.sh`'s. Google TV has no settings entry for other screensavers, so there it is the slideshow only:
 
 | Option | What it does |
 |---|---|
 | Time and date | A line along the bottom with the time and the date, moved a little every minute against burn-in |
-| When a picture was taken | Month and year, from a name ending in the date (`trip-20231202.jpg`) or else the camera's EXIF date |
+| When a picture was taken | The date, from a name ending in it (`trip-20231202.jpg`; month and year for `trip-202312.jpg`) or else the camera's EXIF date |
 | Three prints | Three pictures at a time as tilted prints, the whole picture, never cropped; clips are skipped |
 | Sky | Behind the prints, a sky that follows the time of day |
 | Weather | Temperature and a symbol, from the TV's rough location and Open-Meteo, every 30 minutes |

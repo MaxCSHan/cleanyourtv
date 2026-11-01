@@ -70,9 +70,16 @@ final class Media {
 
     /** The file after {@code previous} by name, wrapping around; the first one when previous is gone. */
     static File next(List<File> files, String previous) {
+        return step(files, previous, 1);
+    }
+
+    /** The file {@code by} places from {@code current} by name (1 next, -1 back), wrapping around; the first one
+     *  when current is gone. */
+    static File step(List<File> files, String current, int by) {
         if (files.isEmpty()) return null;
-        for (int i = 0; i < files.size(); i++) {
-            if (files.get(i).getName().equals(previous)) return files.get((i + 1) % files.size());
+        int n = files.size();
+        for (int i = 0; i < n; i++) {
+            if (files.get(i).getName().equals(current)) return files.get(((i + by) % n + n) % n);
         }
         return files.get(0);
     }
@@ -96,6 +103,14 @@ final class Media {
         if (m == null || !m.find()) return null;
         int year = Integer.parseInt(m.group(1)), month = Integer.parseInt(m.group(2));
         return year >= 1900 && month >= 1 && month <= 12 ? new int[]{year, month} : null;
+    }
+
+    /** The day of the month from a name ending in its full date (photo-20231202.jpg), else 0. */
+    static int dayFromName(String name) {
+        Matcher m = name == null ? null : NAME_DATE.matcher(name);
+        if (m == null || !m.find() || m.group(3) == null) return 0;
+        int day = Integer.parseInt(m.group(3));
+        return day >= 1 && day <= 31 ? day : 0;
     }
 
     static boolean accepted(int width, int height) {

@@ -7,7 +7,7 @@
     <string name="empty_body">Zet foto\'s in deze map op de TV met sync.sh of sync.ps1:</string>
     <string name="settings_title">Foto-screensaver</string>
     <string name="option_clock">Tijd en datum tonen</string>
-    <string name="option_dates">Tonen wanneer een foto is gemaakt (maand en jaar)</string>
+    <string name="option_dates">Tonen wanneer een foto is gemaakt</string>
     <string name="option_prints">Drie afdrukken in plaats van schermvullend (geen clips)</string>
     <string name="option_sky">Lucht die meekleurt met het tijdstip achter de afdrukken</string>
     <string name="option_weather">Het weer tonen (heeft de locatie van de TV nodig)</string>
@@ -17,4 +17,8 @@
     <string name="weather_ok">Locatie staat aan. Het weer wordt elke 30 minuten bijgewerkt.</string>
     <string name="open_location_settings">Locatie-instellingen openen</string>
     <string name="preview">Voorbeeld</string>
+    <string name="option_seconds">Elke foto: %1$d s (OK om te wijzigen)</string>
+    <string name="keys_hint">◀ ▶  Terug en verder   ·   OK  Datum   ·   OK ingedrukt  Instellingen</string>
+    <string name="dates_on">Datum aan</string>
+    <string name="dates_off">Datum uit</string>
 </resources>

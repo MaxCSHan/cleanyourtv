@@ -18,7 +18,8 @@ import java.util.concurrent.Executors;
 
 /**
  * What the screensaver and the card's slideshow show: the pictures (full screen, or as prints), and on top what
- * the options switch on: the time and date, the weather, the sky behind it all. Both hosts call start and stop.
+ * the options switch on: the time and date, the weather, the sky behind it all. Both hosts call start and stop;
+ * the card's slideshow also steps through the pictures, switches the dates and shows a short hint.
  */
 final class Scene {
 
@@ -34,6 +35,7 @@ final class Scene {
     private final SkyView sky;
     private final View bottomLine;
     private final TextView weather;
+    private final TextView hint;
     private final Slides slides;
     private final Prints prints;
     private ExecutorService network;
@@ -47,6 +49,7 @@ final class Scene {
         }
     };
     private final Runnable refreshWeather = this::refreshWeather;
+    private final Runnable hideHint = this::fadeHint;
 
     Scene(Context context) {
         this.context = context;
@@ -68,6 +71,7 @@ final class Scene {
         root.addView(overlay);
         bottomLine = overlay.findViewById(R.id.bottomLine);
         weather = overlay.findViewById(R.id.weather);
+        hint = overlay.findViewById(R.id.hint);
         TextView caption = overlay.findViewById(R.id.caption);
         View empty = overlay.findViewById(R.id.empty);
         File dir = context.getExternalFilesDir(null);
@@ -90,11 +94,38 @@ final class Scene {
                     options.dates);
             slides = null;
         } else {
-            slides = new Slides(context, stage, options.dates ? caption : null, empty);
+            slides = new Slides(context, stage, caption, options.dates, options.seconds, empty);
             prints = null;
-            if (!options.dates) caption.setVisibility(View.GONE);
         }
         bottomLine.bringToFront();
+        hint.bringToFront();
+    }
+
+    private void fadeHint() {
+        hint.animate().alpha(0f).setDuration(600).start();
+    }
+
+    /** Left and Right in full-screen mode; the prints move on by themselves. False when nothing stepped. */
+    boolean step(int by) {
+        if (slides == null) return false;
+        slides.step(by);
+        return true;
+    }
+
+    /** Dates on or off at once in full-screen mode. False for the prints, which take them when built again. */
+    boolean showDates(boolean on) {
+        if (slides == null) return false;
+        slides.showDates(on);
+        return true;
+    }
+
+    /** A short line near the bottom that fades away by itself. */
+    void hint(CharSequence text, long ms) {
+        handler.removeCallbacks(hideHint);
+        hint.animate().cancel();
+        hint.setText(text);
+        hint.animate().alpha(1f).setDuration(250).start();
+        handler.postDelayed(hideHint, ms);
     }
 
     void start() {

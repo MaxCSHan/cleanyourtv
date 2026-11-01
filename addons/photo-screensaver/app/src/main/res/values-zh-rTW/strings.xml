@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">相片</string>
+    <string name="dream_name">相片</string>
+    <string name="date_format">M月d日 EEEE</string>
+    <string name="empty_title">還沒有相片</string>
+    <string name="empty_body">用 sync.sh 或 sync.ps1 把相片放進電視上的這個資料夾：</string>
+    <string name="settings_title">相片</string>
+    <string name="option_clock">顯示時間與日期</string>
+    <string name="option_dates">顯示拍攝日期</string>
+    <string name="option_prints">以三張相紙呈現，取代全螢幕（不播放影片）</string>
+    <string name="option_sky">相紙後方的天空隨時間變化</string>
+    <string name="option_weather">顯示天氣（需要電視的位置）</string>
+    <string name="weather_info">使用電視的大略位置與 Open-Meteo。關閉時不會連網。</string>
+    <string name="weather_no_permission">請允許位置存取以顯示天氣。</string>
+    <string name="weather_location_off">這台電視的定位服務已關閉，開啟後才能顯示天氣。</string>
+    <string name="weather_ok">定位已開啟，天氣每 30 分鐘更新一次。</string>
+    <string name="open_location_settings">開啟位置設定</string>
+    <string name="preview">開始播放</string>
+    <string name="option_seconds">每張相片：%1$d 秒（按 OK 切換）</string>
+    <string name="keys_hint">◀ ▶  上一張／下一張   ·   OK  日期   ·   長按 OK  設定</string>
+    <string name="dates_on">日期：開</string>
+    <string name="dates_off">日期：關</string>
+</resources>

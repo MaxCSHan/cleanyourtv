@@ -4,11 +4,14 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
+import android.text.format.DateFormat;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.text.DateFormatSymbols;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
 
 /**
  * Reading the pictures: the month and year a picture was taken, its upright size and a decode near a given size.
@@ -28,9 +31,13 @@ final class Photos {
         }
     }
 
-    /** "Dec 2023": from the file name (photo-20231202.jpg), else from the camera's own date; else "". */
+    /**
+     * When the picture was taken, in the TV's language: "Dec 2, 2023" (zh-TW "2023年12月2日") when the day is
+     * known, else "Dec 2023". From the file name (photo-20231202.jpg), else from the camera's own date; else "".
+     */
     static String dateOf(File file) {
         int[] ym = Media.dateFromName(file.getName());
+        int day = ym == null ? 0 : Media.dayFromName(file.getName());
         if (ym == null) {
             try {
                 String taken = new ExifInterface(file.getPath()).getAttribute(ExifInterface.TAG_DATETIME_ORIGINAL);
@@ -38,13 +45,20 @@ final class Photos {
                     int year = Integer.parseInt(taken.substring(0, 4));
                     int month = Integer.parseInt(taken.substring(5, 7));
                     if (year >= 1900 && month >= 1 && month <= 12) ym = new int[]{year, month};
+                    if (taken.length() >= 10) day = Integer.parseInt(taken.substring(8, 10));
                 }
             } catch (Exception ignored) {
                 // No date: none is shown.
             }
         }
         if (ym == null) return "";
-        return new DateFormatSymbols().getShortMonths()[ym[1] - 1] + " " + ym[0];
+        if (day < 1 || day > 31) day = 0;
+        Locale locale = Locale.getDefault();
+        String pattern = DateFormat.getBestDateTimePattern(locale, day > 0 ? "yMMMd" : "yMMM");
+        Calendar c = Calendar.getInstance();
+        c.clear();
+        c.set(ym[0], ym[1] - 1, day > 0 ? day : 1);
+        return new SimpleDateFormat(pattern, locale).format(c.getTime());
     }
 
     /** The EXIF rotation that turns the photo upright: 0, 90, 180 or 270. */

@@ -60,6 +60,23 @@
             android:fontFamily="monospace" />
     </LinearLayout>
 
+    <!-- The card's slideshow only: which keys do what, on the first start or Up/Down, then it fades. -->
+    <TextView
+        android:id="@+id/hint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="120dp"
+        android:alpha="0"
+        android:background="@drawable/hint_bg"
+        android:paddingStart="22dp"
+        android:paddingTop="10dp"
+        android:paddingEnd="22dp"
+        android:paddingBottom="10dp"
+        android:letterSpacing="0.04"
+        android:textColor="#E6FFFFFF"
+        android:textSize="15sp" />
+
     <!-- Moved a little every minute so it does not burn in. -->
     <LinearLayout
         android:id="@+id/bottomLine"

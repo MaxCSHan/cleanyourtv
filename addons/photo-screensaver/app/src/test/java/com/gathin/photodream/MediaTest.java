@@ -73,6 +73,26 @@ public class MediaTest {
         assertNull(Media.dateFromName("photo-20231302.jpg"));
         assertNull(Media.dateFromName("holiday.jpg"));
         assertNull(Media.dateFromName(null));
+        assertEquals(2, Media.dayFromName("photo-0007-20231202.jpg"));
+        assertEquals(0, Media.dayFromName("photo-202312.jpg"));
+        assertEquals(0, Media.dayFromName("photo-20231232.jpg"));
+        assertEquals(0, Media.dayFromName(null));
+    }
+
+    @Test public void stepsBackAndForthAroundTheLoop() {
+        List<File> files = Arrays.asList(new File("a.jpg"), new File("b.jpg"), new File("c.jpg"));
+        assertEquals("b.jpg", Media.step(files, "a.jpg", 1).getName());
+        assertEquals("c.jpg", Media.step(files, "a.jpg", -1).getName());
+        assertEquals("a.jpg", Media.step(files, "c.jpg", 1).getName());
+        assertEquals("a.jpg", Media.step(files, "gone.jpg", -1).getName());
+        assertNull(Media.step(Collections.emptyList(), "a.jpg", -1));
+    }
+
+    @Test public void secondsChoicesWrapAround() {
+        assertEquals(10, Options.nextSeconds(0));
+        assertEquals(30, Options.nextSeconds(20));
+        assertEquals(30, Options.nextSeconds(25));
+        assertEquals(10, Options.nextSeconds(300));
     }
 
     private static void write(File file, int bytes) throws Exception {

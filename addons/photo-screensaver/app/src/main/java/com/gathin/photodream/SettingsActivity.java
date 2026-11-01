@@ -16,9 +16,12 @@ import android.widget.ScrollView;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import java.io.File;
+
 /**
  * The options, one switch each, for the remote's D-pad. Reached from the TV's screensaver settings (the
  * screensaver's own settings entry) and by holding OK or pressing Menu in the card's slideshow. All off: the plain slideshow.
+ * Seconds per picture is a button that steps through the choices, so the owner sets it without a computer.
  */
 public class SettingsActivity extends Activity {
 
@@ -47,6 +50,8 @@ public class SettingsActivity extends Activity {
 
         list.addView(toggle(Options.CLOCK, R.string.option_clock, null));
         list.addView(toggle(Options.DATES, R.string.option_dates, null));
+        list.addView(secondsButton(), new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
         list.addView(toggle(Options.PRINTS, R.string.option_prints, on -> skySwitch.setEnabled(on)));
         skySwitch = toggle(Options.SKY, R.string.option_sky, null);
         skySwitch.setEnabled(preferences.getBoolean(Options.PRINTS, false));
@@ -98,6 +103,27 @@ public class SettingsActivity extends Activity {
             if (changed != null) changed.on(value);
         });
         return s;
+    }
+
+    /** "Each photo: 20 s"; OK moves to the next choice and the slideshow takes it on its next start. */
+    private Button secondsButton() {
+        Button b = new Button(this);
+        b.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+        int[] current = {currentSeconds()};
+        b.setText(getString(R.string.option_seconds, current[0]));
+        b.setOnClickListener(v -> {
+            current[0] = Options.nextSeconds(current[0]);
+            preferences.edit().putInt(Options.SECONDS, current[0]).apply();
+            b.setText(getString(R.string.option_seconds, current[0]));
+        });
+        return b;
+    }
+
+    private int currentSeconds() {
+        int chosen = preferences.getInt(Options.SECONDS, 0);
+        if (chosen > 0) return chosen;
+        File dir = getExternalFilesDir(null);
+        return Media.seconds(Photos.read(dir == null ? null : new File(dir, Media.SECONDS)));
     }
 
     private void weatherChanged(boolean on) {
