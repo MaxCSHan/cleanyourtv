@@ -571,6 +571,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                 && !cfg.topMenu && !getResources().getBoolean(R.bool.rtl_menu_bar)) {
             centerCompactHeader();
         }
+        if (cfg.homeDates) homeDates(findViewById(R.id.date), wallpaperPlayer.caption());
         if (cfg.headerWhite) {
             // The clock's own white for the date and the line before it, instead of their dimmed whites.
             ((TextView) findViewById(R.id.date)).setTextColor(Color.WHITE);
@@ -2152,6 +2153,42 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT) return v == continueShows.getChildAt(0);
         return keyCode == KeyEvent.KEYCODE_DPAD_RIGHT
                 && v == continueShows.getChildAt(continueShows.getChildCount() - 1);
+    }
+
+    /**
+     * home_dates: today's date as clear as the photo's, and the photo's caption on the same line at the right edge
+     * (where the grid ends), same font and size, softer, after a photo mark: left is now, right is when it was taken.
+     */
+    private void homeDates(TextView date, TextView caption) {
+        date.setTextColor(0xE6FFFFFF);
+        date.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+        date.setLetterSpacing(0.06f);
+        if (caption == null) return;
+        int soft = 0xC7FFFFFF;
+        caption.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+        caption.setTextColor(soft);
+        caption.setLetterSpacing(0.06f);
+        caption.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_photo_mark, 0, 0, 0);
+        caption.setCompoundDrawablePadding(Math.round(8 * density));
+        caption.setCompoundDrawableTintList(ColorStateList.valueOf(soft));
+        // Room for the shadow inside the view, taken back from the margin: a shadow cut off at the view's edge
+        // shows as a hard-edged box on this kind of GPU.
+        int halo = Math.round(10 * density);
+        caption.setPadding(halo, halo, halo, halo);
+        caption.setShadowLayer(halo, 0, 0, 0x99000000);
+        ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) caption.getLayoutParams();
+        lp.topMargin = 0;
+        lp.setMarginEnd(Math.round(56 * density) - halo);
+        caption.setLayoutParams(lp);
+        // Baselines matched, in window terms: the two sit in different parents.
+        date.getViewTreeObserver().addOnGlobalLayoutListener(() -> {
+            if (date.getBaseline() < 0 || caption.getBaseline() < 0) return;
+            int[] d = new int[2], p = new int[2];
+            date.getLocationInWindow(d);
+            ((View) caption.getParent()).getLocationInWindow(p);
+            float y = d[1] - p[1] + date.getBaseline() - caption.getBaseline();
+            if (caption.getY() != y) caption.setY(y);
+        });
     }
 
     /** now_playing: the song first in the row, with its cover (else its app's icon); OK opens its player. */

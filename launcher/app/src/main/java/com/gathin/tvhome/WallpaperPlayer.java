@@ -248,6 +248,11 @@ final class WallpaperPlayer {
         return text;
     }
 
+    /** The caption view, or null when there are no captions (home_dates places it). */
+    TextView caption() {
+        return caption;
+    }
+
     /** The displayed picture's name, faded across a change; a picture without a name hides the caption. */
     private void showCaption(boolean fade) {
         if (caption == null) return;

@@ -413,6 +413,10 @@
          cmd notification allow_listener com.gathin.tvhome/.NowPlayingListener (tools/build-launcher.sh in our repo
          does it); without it nothing shows. Also a choice in Launcher settings. Can also be set with "now_playing". -->
     <bool name="now_playing">false</bool>
+    <!-- Two dates told apart: today's under the clock clearer (16sp, brighter), and a wallpaper's caption from
+         captions.txt (wallpaper_captions; a date taken, say) on the same line at the right, in the same font, a
+         little softer, after a small photo mark. Can also be set with "home_dates". -->
+    <bool name="home_dates">false</bool>
     <!-- Rotating wallpapers: show each picture's name under the top-right buttons, from a captions.txt next to the
          pictures in wallpapers/ ("01-dusk.jpg<TAB>Dusk over the peaks", one per line). A picture without a line
          shows no name. Can also be set with "wallpaper_captions": true in a theme's config.json. -->

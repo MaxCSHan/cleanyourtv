@@ -19,6 +19,7 @@ rebased on upstream regularly.
 | `continue_row_gap` | 0 to 60: the gap under the continue-watching row, in dp; without `dock_title` it is measured from the dock instead of the hidden name's room (default 20) |
 | `show_settings_button` | false hides the gear at the top right; Settings is then the remote's Settings button (`settings_key_keycodes`, with `settings_key_panel` a panel that includes Launcher settings); without one the gear always shows (default true) |
 | `now_playing` | what plays while Home shows (Spotify and the like) as the continue-watching row's first pill, alone there (titled Now playing) when `continue_watching_row` is off, with the song, the artist and the cover the app hands over; OK opens its player. Read from the TV's media sessions, offline; needs notification-listener access for `NowPlayingListener`, granted over ADB (default false) |
+| `home_dates` | today's date under the clock clearer (16sp, brighter), and a wallpaper's caption from `captions.txt` (a date taken) on the same line at the right, same font, softer, after a photo mark (default false) |
 
 In Launcher settings (hold OK on the gear, or Launcher settings in the remote's Settings panel), three rows switch
 `continue_watching_row`, `now_playing` and `show_settings_button` on the TV. Unlike upstream's choices there, a theme push keeps
@@ -26,7 +27,7 @@ them: they are the owner's. Up from the continue-watching row reaches the top ba
 
 The Photos add-on (`addons/photo-screensaver`, `com.gathin.photodream`) also differs, in its card's slideshow: Left
 and Right step back and forth, OK switches the date taken on and off (the full date when the name carries the day),
-holding OK opens its settings, which add seconds per picture so the TV's owner sets it without a computer; the keys
+holding OK opens its settings, the date in the launcher's Outfit font after the same photo mark, which add seconds per picture so the TV's owner sets it without a computer; the keys
 show for a few seconds on the first start and on Up or Down, nothing stays on screen. Traditional Chinese strings.
 
 Nothing else in the launcher differs: no network access and the same `minSdk`. The APK may pass upstream's 576 KB gate, up to 600 KB.

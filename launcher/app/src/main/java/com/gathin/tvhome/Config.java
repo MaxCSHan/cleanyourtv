@@ -162,6 +162,8 @@ final class Config {
     final boolean showSettingsButton;
     /** now_playing: what plays (a song and its cover) first in the continue-watching row, alone when that is off. */
     final boolean nowPlaying;
+    /** home_dates: today's date clearer, the wallpaper's date (captions.txt) on its line at the right with a photo mark. */
+    final boolean homeDates;
     /** App library as a round button in the top bar (config.xml library_button); needs app_library. */
     final boolean libraryButton;
     /** The App library pill after the last Home row; false hides it while libraryButton is on (show_library_pill). */
@@ -318,7 +320,7 @@ final class Config {
                    int wallpaperFadeMs, int continueWatchingDays, boolean continueWatchingRow,
                    boolean continueWatchingCovers, int dockTitleSize, boolean dockOnlyHome,
                    boolean dockNameBelow, int dockUnfocusedOpacity, int dockBottomMargin, int continueRowGap,
-                   boolean showSettingsButton, boolean nowPlaying) {
+                   boolean showSettingsButton, boolean nowPlaying, boolean homeDates) {
         this.handleViewInputs = handleViewInputs;
         this.tileMenu = tileMenu;
         this.inputKeycodes = inputKeycodes;
@@ -381,6 +383,7 @@ final class Config {
         this.continueRowGap = continueRowGap;
         this.showSettingsButton = showSettingsButton;
         this.nowPlaying = nowPlaying;
+        this.homeDates = homeDates;
         this.libraryButton = libraryButton;
         this.showLibraryPill = showLibraryPill;
         this.wifiLabelWidth = wifiLabelWidth;
@@ -520,6 +523,7 @@ final class Config {
         int continueRowGap = res.getInteger(R.integer.continue_row_gap);
         boolean showSettingsButton = res.getBoolean(R.bool.show_settings_button);
         boolean nowPlaying = res.getBoolean(R.bool.now_playing);
+        boolean homeDates = res.getBoolean(R.bool.home_dates);
         boolean libraryButton = res.getBoolean(R.bool.library_button);
         boolean showLibraryPill = res.getBoolean(R.bool.show_library_pill);
         int wifiLabelWidth = res.getInteger(R.integer.wifi_label_width);
@@ -643,6 +647,7 @@ final class Config {
             continueRowGap = integer(json, "continue_row_gap", continueRowGap, 0, 60);
             showSettingsButton = bool(json, "show_settings_button", showSettingsButton);
             nowPlaying = bool(json, "now_playing", nowPlaying);
+            homeDates = bool(json, "home_dates", homeDates);
             libraryButton = bool(json, "library_button", libraryButton);
             showLibraryPill = bool(json, "show_library_pill", showLibraryPill);
             wifiLabelWidth = integer(json, "wifi_label_width", wifiLabelWidth, 0, 300);
@@ -778,7 +783,7 @@ final class Config {
                 continueWatchingRow, continueWatchingCovers, Math.max(24, Math.min(72, dockTitleSize)),
                 dockOnlyHome, dockNameBelow, Math.max(30, Math.min(100, dockUnfocusedOpacity)),
                 Math.max(0, Math.min(120, dockBottomMargin)), Math.max(0, Math.min(60, continueRowGap)),
-                showSettingsButton, nowPlaying);
+                showSettingsButton, nowPlaying, homeDates);
     }
 
     /**
