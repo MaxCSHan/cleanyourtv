@@ -30,7 +30,7 @@ and Right step back and forth, OK switches the date taken on and off (the full d
 holding OK opens its settings, the date in the launcher's Outfit font after the same photo mark, which add seconds per picture so the TV's owner sets it without a computer; the keys
 show for a few seconds on the first start and on Up or Down, nothing stays on screen. Traditional Chinese strings.
 
-Nothing else in the launcher differs: no network access and the same `minSdk`. The APK may pass upstream's 576 KB gate, up to 600 KB.
+Nothing else in the launcher differs: no network access and the same `minSdk`. The APK may pass upstream's 576 KB gate, up to 1 MB.
 One permission is added: `READ_TV_LISTINGS`, used only by the two continue-watching switches and granted over ADB
 (`adb shell pm grant com.gathin.tvhome android.permission.READ_TV_LISTINGS`). Because it is a new permission, those
 switches stay in this fork rather than going upstream. `now_playing` adds a notification-listener service that does nothing itself; its access is granted over ADB (`cmd notification allow_listener com.gathin.tvhome/com.gathin.tvhome.NowPlayingListener`).
