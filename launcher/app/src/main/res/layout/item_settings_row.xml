@@ -39,19 +39,19 @@
             android:textColor="@drawable/pill_text"
             android:duplicateParentState="true"
             android:textSize="16sp"
-            android:fontFamily="@string/font_medium" />
+            android:fontFamily="@string/font_semibold" />
 
         <TextView
             android:id="@+id/summary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
-            android:textColor="@drawable/pill_text_dim"
+            android:textColor="@drawable/settings_text_dim"
             android:duplicateParentState="true"
             android:textSize="13sp"
             android:maxLines="2"
             android:ellipsize="end"
-            android:fontFamily="@string/font_body" />
+            android:fontFamily="@string/font_medium" />
     </LinearLayout>
 
     <ImageView

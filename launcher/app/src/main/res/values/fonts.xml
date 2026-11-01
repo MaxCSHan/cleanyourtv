@@ -7,4 +7,6 @@
     <string name="font_light" translatable="false">@font/outfit_light</string>
     <string name="font_extralight" translatable="false">@font/outfit_extralight</string>
     <string name="font_medium" translatable="false">@font/outfit_medium</string>
+    <!-- The settings panel's row titles: Latin letters and digits at the weight of the Chinese beside them. -->
+    <string name="font_semibold" translatable="false">@font/outfit_semibold</string>
 </resources>

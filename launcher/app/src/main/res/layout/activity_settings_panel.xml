@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- settings_panel: Launcher settings as a panel on the right over Home, as the TV's own settings are. Home stays in
+<!-- Launcher settings as a panel on the right over Home, as the TV's own settings are. Home stays in
      view at the left and redraws as a value changes. Rows are built in SettingsPanelActivity. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/scrim"
@@ -29,7 +29,7 @@
             android:textColor="#80FFFFFF"
             android:textSize="12sp"
             android:letterSpacing="0.18"
-            android:fontFamily="@string/font_medium" />
+            android:fontFamily="@string/font_semibold" />
 
         <TextView
             android:id="@+id/title"
@@ -40,7 +40,7 @@
             android:singleLine="true"
             android:textColor="#FFFFFFFF"
             android:textSize="30sp"
-            android:fontFamily="@string/font_light" />
+            android:fontFamily="@string/font_regular" />
 
         <ScrollView
             android:id="@+id/scroll"

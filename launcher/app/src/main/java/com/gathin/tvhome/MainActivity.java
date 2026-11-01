@@ -163,7 +163,6 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private boolean dockTitle;
     /** The dock's band, whose left edge the continue-watching row lines up with. */
     private DockDecoration dockDecoration;
-    private boolean settingsPanel;
     /** now_playing: the song playing, first in the continue-watching row; null when off. */
     private NowPlaying nowPlaying;
     /** continue_watching_row: the shows are in the row (else it may hold only what plays). */
@@ -532,9 +531,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         if (cinematic) setUpCinematicShelf(cfg.cinematicScrim);
         dockOnlyHome = cfg.dockOnlyHome;
         dockTitle = cfg.dockTitle;
-        settingsPanel = cfg.settingsPanel;
-        if (settingsPanel) getSharedPreferences(Config.SETTINGS_NAME, MODE_PRIVATE)
-                .registerOnSharedPreferenceChangeListener(livePreview);
+        getSharedPreferences(Config.SETTINGS_NAME, MODE_PRIVATE).registerOnSharedPreferenceChangeListener(livePreview);
         continueRowGap = cfg.continueRowGap;
         if (cfg.dockTitleSize != 48) heroName.setTextSize(TypedValue.COMPLEX_UNIT_SP, cfg.dockTitleSize);
         // The row sits above the dock with or without the name over it (dock_title).
@@ -1170,13 +1167,13 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         }
     }
 
-    /** Launcher settings: the panel over Home with settings_panel, else upstream's full screen. */
+    /** Launcher settings: the panel over Home (upstream's full-screen settings is removed in this fork). */
     private Intent settingsIntent() {
-        return new Intent(this, settingsPanel ? SettingsPanelActivity.class : LauncherSettingsActivity.class);
+        return new Intent(this, SettingsPanelActivity.class);
     }
 
     /**
-     * settings_panel: a change made in the panel rebuilds Home at once, behind it, so it shows while the panel is
+     * A change made in the settings panel rebuilds Home at once, behind it, so it shows while the panel is
      * open. Only while Home is not in front (the panel covers it); in front, onResume compares the count as before.
      */
     private final SharedPreferences.OnSharedPreferenceChangeListener livePreview = (prefs, key) -> {
@@ -1197,8 +1194,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == LAUNCHER_SETTINGS_REQUEST && resultCode == RESULT_OK
-                && data != null && data.getBooleanExtra(LauncherSettingsActivity.EXTRA_REORDER, false)) {
-            getIntent().putExtra(LauncherSettingsActivity.EXTRA_REORDER, true);
+                && data != null && data.getBooleanExtra(SettingsPanelActivity.EXTRA_REORDER, false)) {
+            getIntent().putExtra(SettingsPanelActivity.EXTRA_REORDER, true);
             // The old activity must not consume the pending action, or rebuild a second time in onResume.
             settingsRecreationPending = true;
             settingsRevision = settingsRevision();
@@ -1208,8 +1205,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
     private void startPendingSettingsReorder() {
         if (settingsRecreationPending || !tilesReady || !hasWindowFocus() || isFinishing()
-                || !getIntent().getBooleanExtra(LauncherSettingsActivity.EXTRA_REORDER, false)) return;
-        getIntent().removeExtra(LauncherSettingsActivity.EXTRA_REORDER);
+                || !getIntent().getBooleanExtra(SettingsPanelActivity.EXTRA_REORDER, false)) return;
+        getIntent().removeExtra(SettingsPanelActivity.EXTRA_REORDER);
         toggleReorder();
     }
 

@@ -421,10 +421,6 @@
          the choices from choices.json in the theme directory and changes one by sending choices-set.json there
          (TvChoices). Can also be set with "keep_tv_choices". -->
     <bool name="keep_tv_choices">false</bool>
-    <!-- Launcher settings as a panel on the right over Home, like the TV's own settings: categories with their values,
-         switches, choices on their own page, Back one level up; Home redraws behind it as a value changes. Can also
-         be set with "settings_panel". -->
-    <bool name="settings_panel">false</bool>
     <!-- Rotating wallpapers: show each picture's name under the top-right buttons, from a captions.txt next to the
          pictures in wallpapers/ ("01-dusk.jpg<TAB>Dusk over the peaks", one per line). A picture without a line
          shows no name. Can also be set with "wallpaper_captions": true in a theme's config.json. -->

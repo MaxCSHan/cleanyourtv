@@ -27,12 +27,15 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * settings_panel: Launcher settings as the TV's own settings look. A panel on the right over Home, categories with
+ * Launcher settings as the TV's own settings look. A panel on the right over Home, categories with
  * their current values under them, on/off rows with a switch, choices on a page of their own with a tick, Back one
- * level up. Every choice is saved as LauncherSettingsActivity saves it (the same keys, kept by TvChoices), and the
- * change count moves at once, so Home behind the panel redraws with it.
+ * level up. Upstream's full-screen Launcher settings is removed in this fork; the choices keep its keys (kept by
+ * TvChoices), and the change count moves at once, so Home behind the panel redraws with it.
  */
 public final class SettingsPanelActivity extends Activity {
+    /** Result extra: Home starts reordering the apps (the Reorder row). */
+    static final String EXTRA_REORDER = "com.gathin.tvhome.extra.REORDER_FROM_SETTINGS";
+
     @Override
     protected void attachBaseContext(android.content.Context base) {
         super.attachBaseContext(LauncherLocale.wrap(base));
@@ -162,7 +165,7 @@ public final class SettingsPanelActivity extends Activity {
             }
             if (config.launcherSettingsButton) {
                 rows.add(new Row(R.drawable.ic_swap_vert, getString(R.string.reorder), null, 0, () -> {
-                    setResult(RESULT_OK, new Intent().putExtra(LauncherSettingsActivity.EXTRA_REORDER, true));
+                    setResult(RESULT_OK, new Intent().putExtra(EXTRA_REORDER, true));
                     finish();
                 }));
             }
