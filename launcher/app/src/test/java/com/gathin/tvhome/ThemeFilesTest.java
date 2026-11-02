@@ -29,6 +29,27 @@ public class ThemeFilesTest {
         assertFalse(ThemeFiles.collectionImage("captions.txt"));
     }
 
+    @Test public void clipsAreAllowedInVideosOnly() {
+        assertEquals("videos/home.mp4", ThemeFiles.path(Arrays.asList("videos", "home.mp4")));
+        assertEquals("videos/Room_2.MP4", ThemeFiles.path(Arrays.asList("videos", "Room_2.MP4")));
+        assertNull(ThemeFiles.path(Arrays.asList("videos", "home.mov")));
+        assertNull(ThemeFiles.path(Arrays.asList("videos", ".home.mp4")));
+        assertNull(ThemeFiles.path(Arrays.asList("videos", "..")));
+        assertNull(ThemeFiles.path(Arrays.asList("wallpapers", "home.mp4")));
+        assertNull(ThemeFiles.path(Collections.singletonList("home.mp4")));
+    }
+
+    @Test public void theFirstClipByNameIsPlayed() throws java.io.IOException {
+        java.io.File dir = java.nio.file.Files.createTempDirectory("videos").toFile();
+        assertNull(ThemeFiles.firstVideo(dir));
+        assertNull(ThemeFiles.firstVideo(new java.io.File(dir, "missing")));
+        java.nio.file.Files.write(new java.io.File(dir, "a-empty.mp4").toPath(), new byte[0]);
+        java.nio.file.Files.write(new java.io.File(dir, "c.mp4").toPath(), new byte[]{1});
+        java.nio.file.Files.write(new java.io.File(dir, "b.mp4").toPath(), new byte[]{1});
+        java.nio.file.Files.write(new java.io.File(dir, "a.jpg").toPath(), new byte[]{1});
+        assertEquals("b.mp4", ThemeFiles.firstVideo(dir).getName());
+    }
+
     @Test public void anythingElseIsRefused() {
         assertNull(ThemeFiles.path(null));
         assertNull(ThemeFiles.path(Collections.emptyList()));

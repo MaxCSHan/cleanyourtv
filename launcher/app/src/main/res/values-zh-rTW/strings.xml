@@ -148,4 +148,5 @@
     <string name="panel_settings_button_summary">隱藏時，用遙控器的設定鍵開啟這裡</string>
     <string name="panel_photos_count">%1$d 張相片</string>
     <string name="panel_spotlight">焦點效果</string>
+    <string name="wallpaper_video">動態桌布</string>
 </resources>

@@ -54,6 +54,8 @@ final class WallpaperPlayer {
     private boolean active;
     private boolean closed;
     private boolean loading;
+    /** wallpaper_video: the clip is on screen; the picture (its poster), the caption and the rotation step aside. */
+    private boolean covered;
     private String displayed = "";
     /** wallpaper_captions: the shown picture's name from wallpapers/captions.txt; null when off or there are none. */
     private final TextView caption;
@@ -149,6 +151,27 @@ final class WallpaperPlayer {
         active = false;
     }
 
+    /**
+     * wallpaper_video: true once the clip's first frame is up, the picture fading out over fadeMs to show it; false
+     * puts the picture back at once (the clip stopped), so Home never shows the plain colour between the two.
+     */
+    void setCovered(boolean on, int fadeMs) {
+        if (covered == on) return;
+        covered = on;
+        if (fade != null && on) {
+            fade.animate().cancel();   // a crossfade in progress: the old picture is left to the garbage collector
+            fade.setImageDrawable(null);
+            fade.setVisibility(View.GONE);
+        }
+        for (View v : new View[]{image, caption}) {
+            if (v == null) continue;
+            v.animate().cancel();
+            if (on && fadeMs > 0) v.animate().alpha(0f).setDuration(fadeMs).start();
+            else v.setAlpha(on ? 0f : 1f);
+        }
+        if (!on) update();
+    }
+
     /** Drops the wallpaper texture when Home is hidden and Android asks the process to free memory. */
     void releaseForMemoryPressure() {
         if (current == null) return;
@@ -183,7 +206,7 @@ final class WallpaperPlayer {
     }
 
     void update() {
-        if (!active || closed || loading || files.isEmpty()) return;
+        if (!active || closed || loading || covered || files.isEmpty()) return;
         String previous = preferences.getString("image", "");
         // A picture outside the time of day's group (the group changed) is replaced at once, not after the interval.
         List<File> playable = playable();

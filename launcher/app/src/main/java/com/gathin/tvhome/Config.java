@@ -43,7 +43,7 @@ final class Config {
     /** Choices made on the TV for continue_watching_row and show_settings_button. A theme push keeps them: they are
      *  the owner's, and the theme only sets where they start. */
     static final String CONTINUE_ROW_KEY = "continue_watching_row", SETTINGS_BUTTON_KEY = "show_settings_button",
-            NOW_PLAYING_KEY = "now_playing";
+            NOW_PLAYING_KEY = "now_playing", VIDEO_KEY = "wallpaper_video";
     static final String ROWS_BELOW_DOCK_KEY = "rows_below_dock";
     /** Wallpaper and dock choices from Launcher settings (B19), under their config.json names. */
     static final String ROTATION_KEY = "wallpaper_rotation_minutes", ORDER_KEY = "wallpaper_order",
@@ -169,6 +169,12 @@ final class Config {
     final boolean nowPlayingKeys;
     /** home_dates: today's date clearer, the wallpaper's date (captions.txt) on its line at the right with a photo mark. */
     final boolean homeDates;
+    /** wallpaper_video: the clip that loops behind Home (the first in videos/), or null when off or there is none. */
+    final File wallpaperVideo;
+    /** The first clip in videos/ whether wallpaper_video is on or not, for its Launcher settings row; or null. */
+    final File videoClip;
+    /** wallpaper_video_shade: the shade under the clock and the dock drawn over the clip, in percent. */
+    final int wallpaperVideoShade;
     /** App library as a round button in the top bar (config.xml library_button); needs app_library. */
     final boolean libraryButton;
     /** The App library pill after the last Home row; false hides it while libraryButton is on (show_library_pill). */
@@ -325,7 +331,8 @@ final class Config {
                    int wallpaperFadeMs, int continueWatchingDays, boolean continueWatchingRow,
                    boolean continueWatchingCovers, int dockTitleSize, boolean dockOnlyHome,
                    boolean dockNameBelow, int dockUnfocusedOpacity, int dockBottomMargin, int continueRowGap,
-                   boolean showSettingsButton, boolean nowPlaying, boolean nowPlayingKeys, boolean homeDates) {
+                   boolean showSettingsButton, boolean nowPlaying, boolean nowPlayingKeys, boolean homeDates,
+                   File wallpaperVideo, File videoClip, int wallpaperVideoShade) {
         this.handleViewInputs = handleViewInputs;
         this.tileMenu = tileMenu;
         this.inputKeycodes = inputKeycodes;
@@ -390,6 +397,9 @@ final class Config {
         this.nowPlaying = nowPlaying;
         this.nowPlayingKeys = nowPlayingKeys;
         this.homeDates = homeDates;
+        this.wallpaperVideo = wallpaperVideo;
+        this.videoClip = videoClip;
+        this.wallpaperVideoShade = wallpaperVideoShade;
         this.libraryButton = libraryButton;
         this.showLibraryPill = showLibraryPill;
         this.wifiLabelWidth = wifiLabelWidth;
@@ -531,6 +541,8 @@ final class Config {
         boolean nowPlaying = res.getBoolean(R.bool.now_playing);
         boolean nowPlayingKeys = res.getBoolean(R.bool.now_playing_keys);
         boolean homeDates = res.getBoolean(R.bool.home_dates);
+        boolean wallpaperVideo = res.getBoolean(R.bool.wallpaper_video);
+        int wallpaperVideoShade = res.getInteger(R.integer.wallpaper_video_shade);
         boolean libraryButton = res.getBoolean(R.bool.library_button);
         boolean showLibraryPill = res.getBoolean(R.bool.show_library_pill);
         int wifiLabelWidth = res.getInteger(R.integer.wifi_label_width);
@@ -656,6 +668,8 @@ final class Config {
             nowPlaying = bool(json, "now_playing", nowPlaying);
             nowPlayingKeys = bool(json, "now_playing_keys", nowPlayingKeys);
             homeDates = bool(json, "home_dates", homeDates);
+            wallpaperVideo = bool(json, VIDEO_KEY, wallpaperVideo);
+            wallpaperVideoShade = integer(json, "wallpaper_video_shade", wallpaperVideoShade, 0, 90);
             libraryButton = bool(json, "library_button", libraryButton);
             showLibraryPill = bool(json, "show_library_pill", showLibraryPill);
             wifiLabelWidth = integer(json, "wifi_label_width", wifiLabelWidth, 0, 300);
@@ -752,6 +766,8 @@ final class Config {
         clockFormat = choices.getString(CLOCK_FORMAT_KEY, clockFormat);
         continueWatchingRow = choices.getBoolean(CONTINUE_ROW_KEY, continueWatchingRow);
         nowPlaying = choices.getBoolean(NOW_PLAYING_KEY, nowPlaying);
+        wallpaperVideo = choices.getBoolean(VIDEO_KEY, wallpaperVideo);
+        File videoClip = dir == null ? null : ThemeFiles.firstVideo(new File(dir, ThemeFiles.VIDEOS));
         // Hidden only while the remote's Settings button can still reach these settings.
         showSettingsButton = choices.getBoolean(SETTINGS_BUTTON_KEY, showSettingsButton)
                 || settingsKeycodes.length == 0;
@@ -801,7 +817,8 @@ final class Config {
                 continueWatchingRow, continueWatchingCovers, Math.max(24, Math.min(72, dockTitleSize)),
                 dockOnlyHome, dockNameBelow, Math.max(30, Math.min(100, dockUnfocusedOpacity)),
                 Math.max(0, Math.min(120, dockBottomMargin)), Math.max(0, Math.min(60, continueRowGap)),
-                showSettingsButton, nowPlaying, nowPlayingKeys, homeDates);
+                showSettingsButton, nowPlaying, nowPlayingKeys, homeDates,
+                wallpaperVideo ? videoClip : null, videoClip, Math.max(0, Math.min(90, wallpaperVideoShade)));
     }
 
     /**

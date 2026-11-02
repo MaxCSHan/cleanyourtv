@@ -200,4 +200,5 @@
     <string name="panel_settings_button_summary">Hidden, the remote\'s Settings button opens these settings</string>
     <string name="panel_photos_count">%1$d photos</string>
     <string name="panel_spotlight">Spotlight</string>
+    <string name="wallpaper_video">Moving wallpaper</string>
 </resources>

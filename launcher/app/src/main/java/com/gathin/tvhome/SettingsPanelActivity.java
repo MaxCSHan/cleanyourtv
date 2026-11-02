@@ -193,6 +193,9 @@ public final class SettingsPanelActivity extends Activity {
             List<Row> rows = new ArrayList<>();
             rows.add(new Row(0, getString(R.string.wallpaper_label), wallpaperSummary(), R.drawable.ic_chevron,
                     this::wallpaperPickPage));
+            if (config.videoClip != null) {
+                rows.add(toggle(R.string.wallpaper_video, config.wallpaperVideo != null, Config.VIDEO_KEY));
+            }
             if (config.wallpaperRotationMinutes > 0 && config.wallpapers.size() > 1) {
                 rows.add(choice(0, R.string.wallpaper_interval_label, minutesName(config.wallpaperRotationMinutes),
                         new int[]{1, 5, 15, 30, 60}, this::minutesName, config.wallpaperRotationMinutes,
