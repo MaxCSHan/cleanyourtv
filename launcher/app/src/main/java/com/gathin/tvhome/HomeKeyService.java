@@ -71,6 +71,9 @@ public class HomeKeyService extends AccessibilityService {
     private final Set<String> stockHome = new HashSet<>();
     /** stock_home_redirect, the stock launcher's package. */
     private String stockHomePackage = "";
+    /** probeAtBoot: true until an app's window answers the probe or the tries run out; tries left. */
+    private boolean probing;
+    private int probesLeft;
     /** power_on_home: the Live TV package to send back to Home, empty when off; armed until this uptime or a key. */
     private String powerOnLiveTv = "";
     private long powerOnUntil;
@@ -303,6 +306,7 @@ public class HomeKeyService extends AccessibilityService {
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
         if (event.getEventType() != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) return;
+        if (probing && answersProbe(event)) probing = false;
         // app_keys "front:" entries: only activities count, so a toast or the volume bar doesn't change the app in front.
         if ((!frontAppKeys.isEmpty() || !frontAppScancodes.isEmpty())
                 && event.getPackageName() != null && event.getClassName() != null) {
@@ -383,10 +387,48 @@ public class HomeKeyService extends AccessibilityService {
         SharedPreferences prefs = getSharedPreferences("boot", MODE_PRIVATE);
         if (!firstBindAfterBoot(boot, prefs.getInt("probe_boot", -1), SystemClock.elapsedRealtime())) return;
         prefs.edit().putInt("probe_boot", boot).apply();
+        probing = true;
+        probesLeft = PROBE_TRIES;
+        startProbe();
+    }
+
+    /** How many times probeAtBoot opens ProbeActivity, and how long it waits for an answer each time. */
+    static final int PROBE_TRIES = 3;
+    static final long PROBE_RETRY_MS = 4000;
+
+    /** A stock home still starting when the probe opens (TCL G05: its pause times out) is never paused, so it
+     *  sends no window event when the probe closes and stays on screen. With no app's window in front by
+     *  PROBE_RETRY_MS, the probe runs again; by then the stock home answers like any other app. */
+    private void startProbe() {
+        probesLeft--;
         try {
             startActivity(new Intent(this, ProbeActivity.class)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_ANIMATION));
         } catch (ActivityNotFoundException | SecurityException ignored) {
+            probing = false;
+            return;
+        }
+        handler.postDelayed(this::probeAgain, PROBE_RETRY_MS);
+    }
+
+    private void probeAgain() {
+        if (probeAgain(probing, probesLeft)) startProbe();
+        else probing = false;
+    }
+
+    static boolean probeAgain(boolean unanswered, int left) {
+        return unanswered && left > 0;
+    }
+
+    /** An activity's window other than the probe's: whatever is in front has answered it. */
+    private boolean answersProbe(AccessibilityEvent event) {
+        CharSequence pkg = event.getPackageName(), cls = event.getClassName();
+        if (pkg == null || cls == null || ProbeActivity.class.getName().contentEquals(cls)) return false;
+        try {
+            getPackageManager().getActivityInfo(new ComponentName(pkg.toString(), cls.toString()), 0);
+            return true;
+        } catch (PackageManager.NameNotFoundException notAnActivity) {
+            return false;
         }
     }
 

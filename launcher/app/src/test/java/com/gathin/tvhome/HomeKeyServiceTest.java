@@ -33,6 +33,15 @@ public class HomeKeyServiceTest {
         assertFalse(HomeKeyService.firstBindAfterBoot(-1, -1, SOON));
     }
 
+    @Test public void anUnansweredProbeRunsAgainWhileTriesAreLeft() {
+        assertTrue(HomeKeyService.probeAgain(true, HomeKeyService.PROBE_TRIES - 1));
+        assertFalse(HomeKeyService.probeAgain(true, 0));
+    }
+
+    @Test public void anAnsweredProbeStops() {
+        assertFalse(HomeKeyService.probeAgain(false, HomeKeyService.PROBE_TRIES - 1));
+    }
+
     private static final String TV = "com.mediatek.wwtv.tvcenter";
 
     @Test public void liveTvBeforeAnyKeyGoesHome() {
